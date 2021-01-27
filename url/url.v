@@ -1,8 +1,9 @@
+// url module intended to be used as core library
 module url
 
 import net.urllib
 
-// import time
+/*
 const (
 	// kegiatan
 	rup_rekap_sekbm             = 'https://sirup.lkpp.go.id/sirup/ro/dt/klpd/2?tahun=2021&jenisID=KABUPATEN&sSearch=Pemerintah+Daerah+Kabupaten+Kebumen'
@@ -17,7 +18,7 @@ const (
 	rup_anggaran_kbm            = 'https://sirup.lkpp.go.id/sirup/datatablectr/datatableruprekapkldianggaran?tahun=2021&jenisKLPD=KABUPATEN&sSearch=Pemerintah+Daerah+Kabupaten+Kebumen'
 	rup_anggaran_perkldi        = 'https://sirup.lkpp.go.id/sirup/datatablectr/datatableruprekapkldianggaranpersatker?idKldi=D128&tahun=2021'
 )
-
+*/
 const (
 	baseurl              = 'https://sirup.lkpp.go.id/' // rup base url
 	basepath             = 'sirup/datatablectr/' // rup base path
@@ -50,7 +51,7 @@ const (
 	pds_persatker_path   = mainurl + pds_persatker
 )
 
-struct RawRupResponse {
+struct RawResponse {
 	raw_data      [][]string [json: 'aaData']
 	total_display int        [json: 'iTotalDisplayRecords']
 	secho         int        [json: 'sEcho']
@@ -93,21 +94,29 @@ mut:
 	year         string
 }
 
-enum TKeg {
+enum TipeKeg {
 	pyd
 	swa
 	pds
 }
 
-enum JRek {
+pub fn (tipe TipeKeg) str() string {
+	return match tipe {
+		.pyd { 'Penyedia' }
+		.swa { 'Swakelola' }
+		.pds { 'Penyedia dalam Swakelola' }
+	}
+}
+
+enum JnsRekap {
 	anggaran_sekbm
 	anggaran_satker
 	kegiatan_sekbm
 	kegiatan_satker
 }
 
-pub fn (jk JRek) str() string {
-	return match jk {
+pub fn (jrk JnsRekap) str() string {
+	return match jrk {
 		.anggaran_sekbm { 'Rekap anggaran kabupaten' }
 		.anggaran_satker { 'Rekap anggaran semua satker' }
 		.kegiatan_sekbm { 'Rekap kegiatan kabupaten' }
@@ -115,10 +124,10 @@ pub fn (jk JRek) str() string {
 	}
 }
 
-fn rekap_url_byjenis(jk JRek, tahun string) ?string {
+fn rekap_url_byjenis(jrk JnsRekap, tahun string) ?string {
 	mut val := urllib.new_values()
 	val.add('tahun', tahun)
-	match jk {
+	match jrk {
 		.anggaran_sekbm {
 			mut url := urllib.parse(anggaran_sekbm_path) ?
 			val.add('jenisKLPD', 'KABUPATEN')
@@ -148,7 +157,7 @@ fn rekap_url_byjenis(jk JRek, tahun string) ?string {
 	}
 }
 
-fn allsatker_url_bytipe(tipe TKeg, tahun string) ?string {
+fn allsatker_url_bytipe(tipe TipeKeg, tahun string) ?string {
 	mut val := urllib.new_values()
 	val.add('idKldi', 'D128')
 	val.add('tahun', tahun)
@@ -171,7 +180,7 @@ fn allsatker_url_bytipe(tipe TKeg, tahun string) ?string {
 	}
 }
 
-fn persatker_url_bytipe(tipe TKeg, id_satker string, tahun string) ?string {
+fn persatker_url_bytipe(tipe TipeKeg, id_satker string, tahun string) ?string {
 	mut val := urllib.new_values()
 	val.add('tahun', tahun)
 	val.add('idSatker', id_satker)

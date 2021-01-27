@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS `Rup` (
     `tipe` INT NOT NULL,
     `mtd` INT NOT NULL,
     `jenis` INT NOT NULL,
+    `year` TEXT NOT NULL,
+    `last_updated` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(`satker`) REFERENCES `Satker`(`kode`),
     FOREIGN KEY(`tipe`) REFERENCES `tipe`(`tid`),
     FOREIGN KEY(`mtd`) REFERENCES `metode`(`mid`),

@@ -5,11 +5,13 @@ import time
 
 fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
+
 	// res := fetch_pyd_allsatker(tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
+
 		// typical item ["26395240","DINAS KOMUNIKASI DAN INFORMATIKA",
 		// "Pengadaan Perangkat Lunak Berlisensi",
 		// "17500000","Pengadaan Langsung","APBD","26395240","December 2020"]
@@ -19,6 +21,7 @@ fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 		rup.pagu = item[3]
 		rup.metode = item[4]
 		rup.sumber_dana = item[5]
+
 		// rup.kode_rup = item[6]
 		rup.awal_pemilihan = item[7]
 		rv << rup
@@ -28,19 +31,23 @@ fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 
 fn parse_swa_allsatker(src string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
+
 	// res := fetch_swa_allsatker(tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
+
 		// typical item ["24787378","RSUD PREMBUN","Belanja Perjalanan Dinas Biasa",
 		// "104754000","APBD","24787378","January 2021","Administrasi Kepegawaian Perangkat Daerah"]
 		rup.kode_rup = item[0]
 		rup.satker = item[1]
 		rup.nama_paket = item[2]
 		rup.pagu = item[3]
+
 		// rup.metode not avaliable in swa
 		rup.sumber_dana = item[4]
+
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
 		rup.kegiatan = item[7]
@@ -51,11 +58,13 @@ fn parse_swa_allsatker(src string, tahun string) ?[]Rup {
 
 fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
+
 	// res := fetch_pds_allsatker(tahun) ?
-	dval := json.decode(RawRupResponse, res) ?
+	dval := json.decode(RawResponse, res) ?
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
+
 		// typical item ["27236420","DINAS PERUMAHAN DAN KAWASAN PERMUKIMAN DAN LINGKUNGAN HIDUP",
 		// "Belanja Jasa Jalan/Tol","1000000","Februari 2021","Pengadaan Langsung",
 		// "APBD","true","true","27236420","27236420"]
@@ -66,6 +75,7 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 		rup.awal_pemilihan = item[4]
 		rup.metode = item[5]
 		rup.sumber_dana = item[6]
+
 		// item[7] unknown
 		// item[8] unknown
 		// item[9] kode rup
@@ -75,21 +85,25 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 	return rv
 }
 
-pub fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
+fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
+
 	// res := fetch_pyd_persatker(id_satker, tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
+
 		// typical item ["27031840","Pembangunan Kecamatan Ambal","6000000000","Tender",
 		// "APBD","27031840","December 2020"]
 		rup.kode_rup = item[0]
+
 		// rup.nama_satker = select nama_satker from Satker where kode_satker=id_satker
 		rup.nama_paket = item[1]
 		rup.pagu = item[2]
 		rup.metode = item[3]
 		rup.sumber_dana = item[4]
+
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
 		rv << rup
@@ -97,24 +111,29 @@ pub fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	return rv
 }
 
-pub fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
+fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
+
 	// res := fetch_swa_persatker(id_satker, tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
+
 		// typical item ["24957218","Penyediaan Layanan Kesehatan Untuk UKM dan UKP Rujukan Tingkat Daerah Kabupaten/Kota",
 		// "Operasional Pelayanan Puskesmas","1256422000","BLUD","24957218","January 2021"]
 		rup.kode_rup = item[0]
+
 		// todo: 
 		// rup.nama_satker = select nama_satker from Satker where kode_satker=id_satker
 		rup.nama_paket = item[1]
 		rup.kegiatan = item[2]
 		rup.pagu = item[3]
+
 		// rup.metode not avaliable in swa, diisi Swakelola ?
 		rup.metode = 'Swakelola'
 		rup.sumber_dana = item[4]
+
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
 		rv << rup
@@ -122,23 +141,28 @@ pub fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	return rv
 }
 
-pub fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
+fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
+
 	// res := fetch_pds_persatker(id_satker, tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
+
 		// typical item ["27271980","Belanja Bahan Baku Bangunan",
 		// "905000","Pengadaan Langsung","BLUD","27271980","Mei 2021","true","true","27271980"]
 		rup.kode_rup = item[0]
+
 		// rup.nama_satker = select nama_satker from Satker where kode_satker = id_satker
 		rup.nama_paket = item[1]
 		rup.pagu = item[2]
 		rup.metode = item[3]
 		rup.sumber_dana = item[4]
+
 		// item[5] kode rup
 		rup.awal_pemilihan = item[6]
+
 		// item[7] unknown
 		// item[8] unknown
 		// item[9] kode rup
@@ -147,10 +171,10 @@ pub fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	return rv
 }
 
-pub fn parse_kegiatan_satker(src string, tahun string) ?[]Satker {
+fn parse_kegiatan_satker(src string, tahun string) ?[]Satker {
 	// typical item ["94039","PUSKESMAS KLIRONG 1","27","392","12","1513","23","574","62","2480"]
 	// res := fetch_kegiatan_satker(tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	mut stk := []Satker{}
 	for item in data {
@@ -182,9 +206,9 @@ mut:
 	tot_anggaran_semua string
 }
 
-pub fn parse_anggaran_sekbm(src string, tahun string) ?RekapAnggaranKbm {
+fn parse_anggaran_sekbm(src string, tahun string) ?RekapAnggaranKbm {
 	// res := fetch_anggaran_sekbm(tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	item := data[0]
 	mut rva := RekapAnggaranKbm{}
@@ -215,9 +239,9 @@ mut:
 	tipe_kldi     string
 }
 
-pub fn parse_kegiatan_sekbm(src string, tahun string) ?RekapKegiatanKbm {
+fn parse_kegiatan_sekbm(src string, tahun string) ?RekapKegiatanKbm {
 	// res := fetch_kegiatan_sekbm(tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	item := data[0]
 	mut rk := RekapKegiatanKbm{}
@@ -248,9 +272,9 @@ mut:
 	tot_anggaran_satker     string
 }
 
-pub fn parse_anggaran_satker(src string, tahun string) ?[]RekapAnggaranSatker {
+fn parse_anggaran_satker(src string, tahun string) ?[]RekapAnggaranSatker {
 	// res := fetch_anggaran_satker(tahun) ?
-	dval := json.decode(RawRupResponse, src) ?
+	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
 	mut rks := []RekapAnggaranSatker{}
 	for item in data {
