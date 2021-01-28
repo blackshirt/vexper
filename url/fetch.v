@@ -2,18 +2,6 @@ module url
 
 import net.http
 
-pub struct Kegiatan {
-	keg        TipeKeg
-	per_satker bool
-	id_satker  string
-}
-
-pub struct Rekap {
-	jrk JnsRekap
-}
-
-type TipeToFetch = Kegiatan | Rekap
-
 struct Response {
 mut:
 	url   string
@@ -25,13 +13,13 @@ mut:
 struct XResponse {
 	Response
 mut:
-	opt TipeToFetch
+	opt Tipe
 }
 
 // fetch fetch up rup data for specific `tahun` and provided options `opt`
 // The `opt` accepts sum type in the form `Kegiatan` and `Rekap` type and return response with 
 // populated data
-pub fn fetch(tahun string, opt TipeToFetch) ?XResponse {
+pub fn fetch(tahun string, opt Tipe) ?XResponse {
 	if tahun == '' {
 		eprintln('error empty tahun field required')
 		return error('error empty field tahun required')
@@ -54,19 +42,19 @@ pub fn fetch(tahun string, opt TipeToFetch) ?XResponse {
 		}
 	}
 	if opt is Rekap {
-		res := fetch_rekap(opt.jrk, tahun) ?
+		res := fetch_rekap(opt.jk, tahun) ?
 		xresp.url = res.url
 		xresp.body = res.body
-		xresp.opt = Rekap{opt.jrk}
+		xresp.opt = Rekap{opt.jk}
 		return xresp
 	}
 	return error('Error in fetch')
 }
 
-fn fetch_rekap(jrk JnsRekap, tahun string) ?Response {
+fn fetch_rekap(jk JnsRekap, tahun string) ?Response {
 	mut resp := Response{}
 	resp.tahun = tahun
-	url := rekap_url_byjenis(jrk, tahun) ?
+	url := rekap_url_byjenis(jk, tahun) ?
 	text := http.get_text(url)
 	resp.url = url
 	resp.body = text

@@ -1,8 +1,6 @@
 // url module intended to be used as core library
 module url
 
-import net.urllib
-
 /*
 const (
 	// kegiatan
@@ -61,13 +59,17 @@ struct RawResponse {
 struct Rup {
 mut:
 	kode_rup       string
-	satker         string
+	kode_satker    string
+	nama_satker    string
 	nama_paket     string
 	pagu           string
 	metode         string
 	sumber_dana    string
 	awal_pemilihan string
 	kegiatan       string
+	last_updated   string
+	year           string
+	tipe           TipeKeg
 }
 
 // rup swa
@@ -78,30 +80,14 @@ mut:
 // mut:
 //	kegiatan string
 //}
-// rekap rup per satker
-// "aaData":[["104593","BADAN KEPEGAWAIAN PENDIDIKAN DAN PELATIHAN DAERAH","0","0","0","0","0","0","0","0"]
-struct Satker {
-mut:
-	kode         string
-	nama         string
-	tot_pyd      string
-	tot_pagu_pyd string
-	tot_swa      string
-	tot_pagu_swa string
-	tot_pds      string
-	tot_pagu_pds string
-	last_updated string
-	year         string
-}
-
 enum TipeKeg {
 	pyd
 	swa
 	pds
 }
 
-pub fn (tipe TipeKeg) str() string {
-	return match tipe {
+pub fn (tp TipeKeg) str() string {
+	return match tp {
 		.pyd { 'Penyedia' }
 		.swa { 'Swakelola' }
 		.pds { 'Penyedia dalam Swakelola' }
@@ -115,8 +101,8 @@ enum JnsRekap {
 	kegiatan_satker
 }
 
-pub fn (jrk JnsRekap) str() string {
-	return match jrk {
+pub fn (jk JnsRekap) str() string {
+	return match jk {
 		.anggaran_sekbm { 'Rekap anggaran kabupaten' }
 		.anggaran_satker { 'Rekap anggaran semua satker' }
 		.kegiatan_sekbm { 'Rekap kegiatan kabupaten' }
@@ -124,81 +110,73 @@ pub fn (jrk JnsRekap) str() string {
 	}
 }
 
-fn rekap_url_byjenis(jrk JnsRekap, tahun string) ?string {
-	mut val := urllib.new_values()
-	val.add('tahun', tahun)
-	match jrk {
-		.anggaran_sekbm {
-			mut url := urllib.parse(anggaran_sekbm_path) ?
-			val.add('jenisKLPD', 'KABUPATEN')
-			val.add('sSearch', 'Pemerintah Daerah Kabupaten Kebumen')
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.anggaran_satker {
-			mut url := urllib.parse(anggaran_satker_path) ?
-			val.add('idKldi', 'D128')
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.kegiatan_sekbm {
-			mut url := urllib.parse(kegiatan_sekbm_path) ?
-			val.add('jenisID', 'KABUPATEN')
-			val.add('sSearch', 'Pemerintah Daerah Kabupaten Kebumen')
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.kegiatan_satker {
-			mut url := urllib.parse(kegiatan_satker_path) ?
-			val.add('idKldi', 'D128')
-			url.raw_query = val.encode()
-			return url.str()
-		}
-	}
+pub struct Kegiatan {
+	keg        TipeKeg
+	per_satker bool
+	id_satker  string
 }
 
-fn allsatker_url_bytipe(tipe TipeKeg, tahun string) ?string {
-	mut val := urllib.new_values()
-	val.add('idKldi', 'D128')
-	val.add('tahun', tahun)
-	match tipe {
-		.pyd {
-			mut url := urllib.parse(pyd_allsatker_path) ?
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.swa {
-			mut url := urllib.parse(swa_allsatker_path) ?
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.pds {
-			mut url := urllib.parse(pds_allsatker_path) ?
-			url.raw_query = val.encode()
-			return url.str()
-		}
-	}
+pub struct Rekap {
+	jk JnsRekap
 }
 
-fn persatker_url_bytipe(tipe TipeKeg, id_satker string, tahun string) ?string {
-	mut val := urllib.new_values()
-	val.add('tahun', tahun)
-	val.add('idSatker', id_satker)
-	match tipe {
-		.pyd {
-			mut url := urllib.parse(pyd_persatker_path) ?
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.swa {
-			mut url := urllib.parse(swa_persatker_path) ?
-			url.raw_query = val.encode()
-			return url.str()
-		}
-		.pds {
-			mut url := urllib.parse(pds_persatker_path) ?
-			url.raw_query = val.encode()
-			return url.str()
-		}
-	}
+type Tipe = Kegiatan | Rekap
+
+// ["D128","Pemerintah Daerah Kabupaten Kebumen",
+// "130579571100","76459681099","2316174000","209355426199"]
+struct RekapAnggaranKbm {
+mut:
+	kode_kldi          string
+	nama_kldi          string
+	tot_anggaran_pyd   string
+	tot_anggaran_swa   string
+	tot_anggaran_pds   string
+	tot_anggaran_semua string
+}
+
+// anggaran persatker
+// ["63401","DINAS PEKERJAAN UMUM DAN PENATAAN RUANG",
+//"27956840000","0","0","27956840000"],
+struct RekapAnggaranSatker {
+mut:
+	kode_satker             string
+	nama_satker             string
+	tot_anggaran_pyd_satker string
+	tot_anggaran_swa_satker string
+	tot_anggaran_pds_satker string
+	tot_anggaran_satker     string
+}
+
+// total rekap rup kebumen
+// {"aaData":[["D128","Pemerintah Daerah Kabupaten Kebumen",
+// "964","130957","1088","76459","163","2316","2215","209733","KABUPATEN"]],"iTotalDisplayRecords":1,"sEcho":2}
+struct RekapKegiatanKbm {
+mut:
+	kode_kldi     string
+	nama_kldi     string
+	tot_paket_pyd string
+	tot_pagu_pyd  string
+	tot_paket_swa string
+	tot_pagu_swa  string
+	tot_paket_pds string
+	tot_pagu_pds  string
+	tot_paket     string
+	tot_pagu      string
+	tipe_kldi     string
+}
+
+// rekap rup per satker
+// "aaData":[["104593","BADAN KEPEGAWAIAN PENDIDIKAN DAN PELATIHAN DAERAH","0","0","0","0","0","0","0","0"]
+struct RekapKegiatanSatker {
+mut:
+	kode         string
+	nama         string
+	tot_pyd      string
+	tot_pagu_pyd string
+	tot_swa      string
+	tot_pagu_swa string
+	tot_pds      string
+	tot_pagu_pds string
+	last_updated string
+	year         string
 }

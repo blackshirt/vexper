@@ -1,6 +1,6 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS `Satker` (
+CREATE TABLE IF NOT EXISTS `RekapKegiatanSatker` (
     `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     `kode` TEXT NOT NULL,
     `nama` TEXT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `Satker` (
     `tot_pds` TEXT NOT NULL DEFAULT '0',
     `tot_pagu_pds` TEXT NOT NULL DEFAULT '0',
     `last_updated` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `year` TEXT NOT NULL DEFAULT '2021',
+    `year` TEXT NOT NULL,
     UNIQUE (`kode`, `nama`)
 );
 
@@ -29,25 +29,6 @@ VALUES
     (3, "Konsultansi", "Pengadaan jasa konsultansi"),
     (4, "Jasa Lainnya", "Pengadaan jasa lainnya"),
     (5, "Sayembara", "Pengadaan sayembara") ON CONFLICT DO NOTHING;
-
-CREATE TABLE IF NOT EXISTS `tipe`(
-    `tid` INTEGER PRIMARY KEY AUTOINCREMENT,
-    `key` TEXT CHECK(key IN ('pyd', 'swa', 'pds')) NOT NULL UNIQUE,
-    `nama` VARCHAR(256) NOT NULL UNIQUE,
-    `desc` VARCHAR(256)
-);
-
-INSERT
-    OR REPLACE INTO tipe(tid, key, nama, desc)
-VALUES
-    (1, "pyd", "Penyedia", "Rup jenis penyedia"),
-    (2, "swa", "Swakelola", "Rup jenis swakelola"),
-    (
-        3,
-        "pds",
-        "Penyedia dalam Swakelola",
-        "Rup penyedia dalam swakelola"
-    ) ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS `metode` (
     `mid` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,16 +82,14 @@ CREATE TABLE IF NOT EXISTS `Rup` (
     `sumber_dana` VARCHAR(128) NOT NULL,
     `kegiatan` TEXT,
     `satker` TEXT NOT NULL,
-    `tipe` INT NOT NULL,
-    `mtd` INT NOT NULL,
-    `jenis` INT NOT NULL,
+    `tipe` TEXT NOT NULL,
+    `mtd` INT,
+    `jenis` INT,
     `year` TEXT NOT NULL,
     `last_updated` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(`satker`) REFERENCES `Satker`(`kode`),
-    FOREIGN KEY(`tipe`) REFERENCES `tipe`(`tid`),
+    FOREIGN KEY(`satker`) REFERENCES `RekapKegiatanSatker`(`kode`),
     FOREIGN KEY(`mtd`) REFERENCES `metode`(`mid`),
-    FOREIGN KEY(`jenis`) REFERENCES `jenis`(`jid`)
-);
+    FOREIGN KEY(`jenis`) REFERENCES `jenis`(`jid`));
 
 CREATE VIEW IF NOT EXISTS `v_rups` AS
 SELECT
@@ -120,13 +99,7 @@ SELECT
     Rup.sumber_dana AS dana,
     Rup.pagu AS pagu,
     Rup.awal_pemilihan AS awal_pemilihan,
-    Satker.nama AS satker,
-    metode.nama AS metode,
-    tipe.nama AS tipe,
-    jenis.nama AS jenis
+    RekapKegiatanSatker.nama AS satker
 FROM
     `Rup`
-    INNER JOIN Satker ON Satker.kode = Rup.satker
-    INNER JOIN metode ON metode.mid = Rup.mtd
-    INNER JOIN tipe ON tipe.tid = Rup.tipe
-    INNER JOIN jenis ON jenis.jid = Rup.jenis;
+INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode = Rup.satker;
