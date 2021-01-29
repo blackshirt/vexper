@@ -80,10 +80,26 @@ mut:
 // mut:
 //	kegiatan string
 //}
-
 enum JenPeng {
-	
-} 
+	unknown
+	barang
+	konstruksi
+	konsultansi
+	jasalainnya
+	sayembara
+}
+
+fn (j JenPeng) str() string {
+	return match j {
+		.unknown { 'Unknown' }
+		.barang { 'Barang' }
+		.konstruksi { 'Konstruksi' }
+		.konsultansi { 'Konsultansi' }
+		.jasalainnya { 'Jasa lainnya' }
+		.sayembara { 'Sayembara' }
+	}
+}
+
 enum TipeKeg {
 	pyd
 	swa
@@ -136,6 +152,8 @@ mut:
 	tot_anggaran_swa   string
 	tot_anggaran_pds   string
 	tot_anggaran_semua string
+	last_updated string
+	year         string
 }
 
 // anggaran persatker
@@ -149,6 +167,8 @@ mut:
 	tot_anggaran_swa_satker string
 	tot_anggaran_pds_satker string
 	tot_anggaran_satker     string
+	last_updated string
+	year         string
 }
 
 // total rekap rup kebumen
@@ -167,6 +187,8 @@ mut:
 	tot_paket     string
 	tot_pagu      string
 	tipe_kldi     string
+	last_updated string
+	year         string
 }
 
 // rekap rup per satker

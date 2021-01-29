@@ -49,9 +49,13 @@ pub fn parse_response(r XResponse) ?Result {
 			.anggaran_sekbm {
 				mut res := Result{}
 				data := parse_anggaran_sekbm(r.body, r.tahun) ?
-				k := Store(data)
-				res.data = [k]
-				res.len = [k].len
+				mut w := []Store{}
+				for i in data {
+					k := Store(i)
+					w << k
+				}
+				res.data = w
+				res.len = w.len
 				return res
 			}
 			.anggaran_satker {
@@ -81,10 +85,14 @@ pub fn parse_response(r XResponse) ?Result {
 			.kegiatan_sekbm {
 				mut res := Result{}
 				data := parse_kegiatan_sekbm(r.body, r.tahun) ?
-				k := Store(data)
+				mut k := []Store{}
 				// ck := k as RekapKegiatanKbm
-				res.data = [k]
-				res.len = [k].len
+				for i in data {
+					s := Store(i)
+					k << s
+				}
+				res.data = k
+				res.len = k.len
 				return res
 			}
 		}
@@ -119,7 +127,7 @@ fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 		// "17500000","Pengadaan Langsung","APBD","26395240","December 2020"]
 		rup.kode_rup = item[0]
 		rup.nama_satker = item[1]
-		//rup.kode_satker = ''
+		// rup.kode_satker = ''
 		rup.nama_paket = item[2]
 		rup.pagu = item[3]
 		rup.metode = item[4]
@@ -287,8 +295,8 @@ fn parse_kegiatan_satker(src string, tahun string) ?[]RekapKegiatanSatker {
 	mut stk := []RekapKegiatanSatker{}
 	for item in data {
 		mut sk := RekapKegiatanSatker{}
-		sk.kode = item[0]
-		sk.nama = item[1]
+		sk.kode_satker = item[0]
+		sk.nama_satker = item[1]
 		sk.tot_pyd = item[2]
 		sk.tot_pagu_pyd = item[3]
 		sk.tot_swa = item[4]
@@ -302,39 +310,51 @@ fn parse_kegiatan_satker(src string, tahun string) ?[]RekapKegiatanSatker {
 	return stk
 }
 
-fn parse_anggaran_sekbm(src string, tahun string) ?RekapAnggaranKbm {
+fn parse_anggaran_sekbm(src string, tahun string) ?[]RekapAnggaranKbm {
 	// res := fetch_anggaran_sekbm(tahun) ?
 	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
-	item := data[0]
-	mut rva := RekapAnggaranKbm{}
-	rva.kode_kldi = item[0]
-	rva.nama_kldi = item[1]
-	rva.tot_anggaran_pyd = item[2]
-	rva.tot_anggaran_swa = item[3]
-	rva.tot_anggaran_pds = item[4]
-	rva.tot_anggaran_semua = item[5]
-	return rva
+	// item := data[0]
+	mut rka := []RekapAnggaranKbm{}
+	for item in data {
+		mut rva := RekapAnggaranKbm{}
+		rva.kode_kldi = item[0]
+		rva.nama_kldi = item[1]
+		rva.tot_anggaran_pyd = item[2]
+		rva.tot_anggaran_swa = item[3]
+		rva.tot_anggaran_pds = item[4]
+		rva.tot_anggaran_semua = item[5]
+		rva.last_updated = time.now().str()
+		rva.year = tahun
+		rka << rva
+	}
+	return rka
 }
 
-fn parse_kegiatan_sekbm(src string, tahun string) ?RekapKegiatanKbm {
+fn parse_kegiatan_sekbm(src string, tahun string) ?[]RekapKegiatanKbm {
 	// res := fetch_kegiatan_sekbm(tahun) ?
 	dval := json.decode(RawResponse, src) ?
 	data := dval.raw_data
-	item := data[0]
-	mut rk := RekapKegiatanKbm{}
-	rk.kode_kldi = item[0]
-	rk.nama_kldi = item[1]
-	rk.tot_paket_pyd = item[2]
-	rk.tot_pagu_pyd = item[3]
-	rk.tot_paket_swa = item[4]
-	rk.tot_pagu_swa = item[5]
-	rk.tot_paket_pds = item[6]
-	rk.tot_pagu_pds = item[7]
-	rk.tot_paket = item[8]
-	rk.tot_pagu = item[9]
-	rk.tipe_kldi = item[10]
-	return rk
+	// item := data[0]
+	mut rkk := []RekapKegiatanKbm{}
+	for item in data {
+		mut rk := RekapKegiatanKbm{}
+		rk.kode_kldi = item[0]
+		rk.nama_kldi = item[1]
+		rk.tot_paket_pyd = item[2]
+		rk.tot_pagu_pyd = item[3]
+		rk.tot_paket_swa = item[4]
+		rk.tot_pagu_swa = item[5]
+		rk.tot_paket_pds = item[6]
+		rk.tot_pagu_pds = item[7]
+		rk.tot_paket = item[8]
+		rk.tot_pagu = item[9]
+		rk.tipe_kldi = item[10]
+		rk.last_updated = time.now().str()
+		rk.year = tahun
+		rkk << rk
+	}
+	return rkk
 }
 
 fn parse_anggaran_satker(src string, tahun string) ?[]RekapAnggaranSatker {
@@ -350,6 +370,8 @@ fn parse_anggaran_satker(src string, tahun string) ?[]RekapAnggaranSatker {
 		rka.tot_anggaran_swa_satker = item[3]
 		rka.tot_anggaran_pds_satker = item[4]
 		rka.tot_anggaran_satker = item[5]
+		rka.last_updated = time.now().str()
+		rka.year = tahun
 		rks << rka
 	}
 	return rks
