@@ -80,6 +80,10 @@ mut:
 // mut:
 //	kegiatan string
 //}
+
+enum JenPeng {
+	
+} 
 enum TipeKeg {
 	pyd
 	swa
@@ -169,8 +173,8 @@ mut:
 // "aaData":[["104593","BADAN KEPEGAWAIAN PENDIDIKAN DAN PELATIHAN DAERAH","0","0","0","0","0","0","0","0"]
 struct RekapKegiatanSatker {
 mut:
-	kode         string
-	nama         string
+	kode_satker  string
+	nama_satker  string
 	tot_pyd      string
 	tot_pagu_pyd string
 	tot_swa      string

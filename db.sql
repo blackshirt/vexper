@@ -2,8 +2,8 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS `RekapKegiatanSatker` (
     `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    `kode` TEXT NOT NULL,
-    `nama` TEXT NOT NULL,
+    `kode_satker` TEXT NOT NULL UNIQUE,
+    `nama_satker` TEXT NOT NULL UNIQUE,
     `tot_pyd` TEXT NOT NULL DEFAULT '0',
     `tot_pagu_pyd` TEXT NOT NULL DEFAULT '0',
     `tot_swa` TEXT NOT NULL DEFAULT '0',
@@ -11,8 +11,7 @@ CREATE TABLE IF NOT EXISTS `RekapKegiatanSatker` (
     `tot_pds` TEXT NOT NULL DEFAULT '0',
     `tot_pagu_pds` TEXT NOT NULL DEFAULT '0',
     `last_updated` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `year` TEXT NOT NULL,
-    UNIQUE (`kode`, `nama`)
+    `year` TEXT NOT NULL DEFAULT strftime('%Y', 'now')
 );
 
 CREATE TABLE IF NOT EXISTS `jenis` (
@@ -24,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `jenis` (
 INSERT
     OR REPLACE INTO `jenis`
 VALUES
+    (0, "Undefined", "Undefined jenis"),
     (1, "Barang", "Pengadaan barang"),
     (2, "Konstruksi", "Pengadaan jasa konstruksi"),
     (3, "Konsultansi", "Pengadaan jasa konsultansi"),
@@ -37,8 +37,9 @@ CREATE TABLE IF NOT EXISTS `metode` (
 );
 
 INSERT
-    OR REPLACE INTO metode(mid, nama, desc)
+    OR REPLACE INTO `metode`(mid, nama, desc)
 VALUES
+    (0, "Undefined", "Undefined method"),
     (
         1,
         "Pengadaan Langsung",
@@ -74,22 +75,23 @@ VALUES
 
 CREATE TABLE IF NOT EXISTS `Rup` (
     `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    `kode` TEXT NOT NULL UNIQUE,
+    `kode_rup` TEXT NOT NULL UNIQUE,
     `nama_paket` VARCHAR(256) NOT NULL,
     `pagu` VARCHAR(128) NOT NULL,
     `awal_pemilihan` VARCHAR(128) NOT NULL,
     `metode` VARCHAR(128) NOT NULL,
     `sumber_dana` VARCHAR(128) NOT NULL,
     `kegiatan` TEXT,
-    `satker` TEXT NOT NULL,
+    `kode_satker` TEXT NOT NULL,
     `tipe` TEXT NOT NULL,
-    `mtd` INT,
-    `jenis` INT,
-    `year` TEXT NOT NULL,
+    `mtd` INT NOT NULL DEFAULT 0,
+    `jenis` INT NOT NULL DEFAULT 0,
+    `year` TEXT NOT NULL DEFAULT strftime('%Y', 'now'),
     `last_updated` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(`satker`) REFERENCES `RekapKegiatanSatker`(`kode`),
+    FOREIGN KEY(`kode_satker`) REFERENCES `RekapKegiatanSatker`(`kode_satker`),
     FOREIGN KEY(`mtd`) REFERENCES `metode`(`mid`),
-    FOREIGN KEY(`jenis`) REFERENCES `jenis`(`jid`));
+    FOREIGN KEY(`jenis`) REFERENCES `jenis`(`jid`)
+);
 
 CREATE VIEW IF NOT EXISTS `v_rups` AS
 SELECT
@@ -102,4 +104,4 @@ SELECT
     RekapKegiatanSatker.nama AS satker
 FROM
     `Rup`
-INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode = Rup.satker;
+    INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode_satker = Rup.kode_satker;
