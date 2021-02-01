@@ -137,7 +137,7 @@ fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 		rup.kegiatan = item[2] // sama paket ??
 		rup.last_updated = time.now().str()
 		rup.year = tahun
-		rup.tipe = .pyd
+		rup.tipe = 'Penyedia'
 		rv << rup
 	}
 	return rv
@@ -164,7 +164,7 @@ fn parse_swa_allsatker(src string, tahun string) ?[]Rup {
 		rup.kegiatan = item[7]
 		rup.last_updated = time.now().str()
 		rup.year = tahun
-		rup.tipe = .swa
+		rup.tipe = 'Swakelola'
 		rv << rup
 	}
 	return rv
@@ -195,7 +195,7 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 		// item[10] kode rup
 		rup.last_updated = time.now().str()
 		rup.year = tahun
-		rup.tipe = .pds
+		rup.tipe = 'Penyedia dalam Swakelola'
 		rv << rup
 	}
 	return rv
@@ -222,7 +222,7 @@ fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.kode_satker = id_satker
 		rup.last_updated = time.now().str()
 		rup.year = tahun
-		rup.tipe = .pyd
+		rup.tipe = 'Penyedia'
 		rv << rup
 	}
 	return rv
@@ -251,7 +251,7 @@ fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.awal_pemilihan = item[6]
 		rup.last_updated = time.now().str()
 		rup.year = tahun
-		rup.tipe = .swa
+		rup.tipe = 'Swakelola'
 		rv << rup
 	}
 	return rv
@@ -281,7 +281,7 @@ fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.kode_satker = id_satker
 		rup.last_updated = time.now().str()
 		rup.year = tahun
-		rup.tipe = .pds
+		rup.tipe = 'Penyedia dalam Swakelola'
 		rv << rup
 	}
 	return rv

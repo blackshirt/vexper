@@ -1,60 +1,27 @@
-// import sqlite
 import url
 import sqlite
+import nedpals.vex.router
+import nedpals.vex.server
+import nedpals.vex.ctx
+
 
 fn main() {
 	db := sqlite.connect('db.sqlite3') or { panic(err) }
-	safe := true
-	c := url.CPool{db, safe}
-	// res := url.parse_rekap_kegiatan_allsatker('2021') or { panic(err) }
-	// println('insert data to db')
-	// c.save_satker(res)
-	opt := url.Kegiatan{.pds, false, ''}
-	//opt := url.Rekap{.kegiatan_satker}
-	//opt := url.Rekap{.anggaran_satker}
-	xres := url.fetch('2021', opt) or { return }
-	// println(xres)
-	xrs := url.parse_response(xres) or { return }
-	println(xrs)
-	data := xrs.data() //[]Store 
-	/*
-	mut kbm := []url.RekapKegiatanKbm{}
-	for item in data {
-		m := item as url.RekapKegiatanKbm
-		kbm << m
-	}
-	c.save_kegiatan_sekbm(kbm)
-	*/
-	/*
-	mut agk := []url.RekapAnggaranKbm{}
-	for item in data {
-		m := item as url.RekapAnggaranKbm
-		agk << m
-	}
-	c.save_anggaran_sekbm(agk)
+	c := url.CPool{db, true}
 	
-	*/
-	/*
-	mut ras := []url.RekapAnggaranSatker{}
-	for item in data {
-		m := item as url.RekapAnggaranSatker
-		ras << m
-	}
-	c.save_anggaran_satker(ras)
-	*/
-	/*
-	mut stk := []url.RekapKegiatanSatker{}
-	for item in data {
-		m := item as url.RekapKegiatanSatker
-		stk << m
-	}
-	c.save_kegiatan_satker(stk)
-	*/
-	
-	mut rups := []url.Rup{}
-	for item in data {
-		u := item as url.Rup
-		rups << u
-	}
-	c.save_rup(rups)
+	mut app := router.new()
+	app.inject(c)
+	app.route(.get, '/assets/*filename', fn (req &ctx.Req, mut res ctx.Resp) {
+		filename := req.params['filename']
+		res.send_file('/assets/$filename', 200)
+	})
+	app.route(.get, '/', fn (req &ctx.Req, mut res ctx.Resp) {
+		res.send_file('index.html', 200)
+	})
+	app.route(.get, '/rups', fn (req &ctx.Req, mut res ctx.Resp) {
+		db := &url.CPool(req.ctx)
+		rows := db.rup_from_satker('63401')
+		res.send_json<[]url.Rup>(rows, 200)
+	})
+	server.serve(app, 6789)
 }

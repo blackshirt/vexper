@@ -53,12 +53,6 @@ fn (c CPool) rup_withkode_exist(kode_rup string) bool {
 	return false
 }
 
-fn (c CPool) array_from_satker_exist(satker string) bool {
-	q := "SELECT * FROM v_rups WHERE satker='${satker}';"
-	_, _ := c.exec(q)
-	return false
-}
-
 fn (c CPool) satker_exist(nama_satker string) bool {
 	q := "ELECT EXISTS(SELECT 1 FROM RekapKegiatanSatker WHERE nama_satker='${nama_satker}' LIMIT 1);"
 	res := c.q_int(q)

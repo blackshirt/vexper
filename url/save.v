@@ -2,7 +2,7 @@ module url
 
 
 
-pub fn (c CPool) save_rup(rups []Rup) {
+pub fn (c CPool) save_rup(mut rups []Rup) {
 	if rups.len == 0 {
 		return
 	}

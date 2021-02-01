@@ -69,7 +69,8 @@ mut:
 	kegiatan       string
 	last_updated   string
 	year           string
-	tipe           TipeKeg
+	tipe           string
+	jenis          JenPeng
 }
 
 // rup swa
@@ -100,6 +101,17 @@ fn (j JenPeng) str() string {
 	}
 }
 
+fn jenis_pengadaan_from_str(jp string) JenPeng {
+	return match jp {
+		'Barang' { JenPeng.barang }
+		'Konstruksi' { JenPeng.konstruksi }
+		'Konsultansi' { JenPeng.konsultansi }
+		'Jasa lainnya' { JenPeng.jasalainnya }
+		'Sayembara' { JenPeng.sayembara }
+		else { JenPeng.unknown }
+	}
+}
+
 enum TipeKeg {
 	pyd
 	swa
@@ -111,6 +123,15 @@ pub fn (tp TipeKeg) str() string {
 		.pyd { 'Penyedia' }
 		.swa { 'Swakelola' }
 		.pds { 'Penyedia dalam Swakelola' }
+	}
+}
+
+pub fn tipekeg_from_str(tk string) TipeKeg {
+	return match tk {
+		'Penyedia' { TipeKeg.pyd }
+		'Swakelola' { TipeKeg.swa }
+		'Penyedia dalam Swakelola' { TipeKeg.pds }
+		else { TipeKeg.swa }
 	}
 }
 
@@ -152,8 +173,8 @@ mut:
 	tot_anggaran_swa   string
 	tot_anggaran_pds   string
 	tot_anggaran_semua string
-	last_updated string
-	year         string
+	last_updated       string
+	year               string
 }
 
 // anggaran persatker
@@ -167,8 +188,8 @@ mut:
 	tot_anggaran_swa_satker string
 	tot_anggaran_pds_satker string
 	tot_anggaran_satker     string
-	last_updated string
-	year         string
+	last_updated            string
+	year                    string
 }
 
 // total rekap rup kebumen
@@ -187,8 +208,8 @@ mut:
 	tot_paket     string
 	tot_pagu      string
 	tipe_kldi     string
-	last_updated string
-	year         string
+	last_updated  string
+	year          string
 }
 
 // rekap rup per satker
@@ -205,4 +226,39 @@ mut:
 	tot_pagu_pds string
 	last_updated string
 	year         string
+}
+
+enum MePeng {
+	tender
+	swakelola
+	epurchasing
+	tendercepat
+	dikecualikan
+	pengadaanlangsung
+	penunjukanlangsung
+}
+
+pub fn (mp MePeng) str() string {
+	return match mp {
+		.tender { 'Tender' }
+		.swakelola { 'Swakelola' }
+		.epurchasing { 'e-Purchasing' }
+		.tendercepat { 'Tender Cepat' }
+		.dikecualikan { 'Dikecualikan' }
+		.pengadaanlangsung { 'Pengadaan Langsung' }
+		.penunjukanlangsung { 'Penunjukan Langsung' }
+	}
+}
+
+pub fn method_from_str(m string) MePeng {
+	return match m {
+		'Tender' { MePeng.tender }
+		'Swakelola' { MePeng.swakelola }
+		'e-Purchasing' { MePeng.epurchasing }
+		'Tender Cepat' { MePeng.tendercepat }
+		'Dikecualikan' { MePeng.dikecualikan }
+		'Pengadaan Langsung' { MePeng.pengadaanlangsung }
+		'Penunjukan Langsung' { MePeng.penunjukanlangsung }
+		else { MePeng.pengadaanlangsung }
+	}
 }
