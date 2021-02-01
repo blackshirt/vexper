@@ -23,5 +23,21 @@ fn main() {
 		rows := db.rup_from_satker('63401')
 		res.send_json<[]url.Rup>(rows, 200)
 	})
+
+	app.route(.get, '/penyedia', fn (req &ctx.Req, mut res ctx.Resp){
+		db := &url.CPool(req.ctx)
+		rows := db.penyedia()
+		res.send_json<[]url.Rup>(rows, 200)
+	})
+	app.route(.get, '/swakelola', fn (req &ctx.Req, mut res ctx.Resp){
+		db := &url.CPool(req.ctx)
+		rows := db.swakelola()
+		res.send_json<[]url.Rup>(rows, 200)
+	})
+	app.route(.get, '/penyediadlmswakelola', fn (req &ctx.Req, mut res ctx.Resp){
+		db := &url.CPool(req.ctx)
+		rows := db.penyediadlmswakelola()
+		res.send_json<[]url.Rup>(rows, 200)
+	})
 	server.serve(app, 6789)
 }
