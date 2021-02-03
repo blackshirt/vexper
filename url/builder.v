@@ -2,10 +2,10 @@ module url
 
 import net.urllib
 
-fn rekap_url_byjenis(jk JnsRekap, tahun string) ?string {
+fn rekap_url_byjenis(jnr JnsRekap, tahun string) ?string {
 	mut val := urllib.new_values()
 	val.add('tahun', tahun)
-	match jk {
+	match jnr {
 		.anggaran_sekbm {
 			mut url := urllib.parse(anggaran_sekbm_path) ?
 			val.add('jenisKLPD', 'KABUPATEN')

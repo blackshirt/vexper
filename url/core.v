@@ -112,56 +112,7 @@ fn jenis_pengadaan_from_str(jp string) JenPeng {
 	}
 }
 
-enum TipeKeg {
-	pyd
-	swa
-	pds
-}
 
-pub fn (tp TipeKeg) str() string {
-	return match tp {
-		.pyd { 'Penyedia' }
-		.swa { 'Swakelola' }
-		.pds { 'Penyedia dalam Swakelola' }
-	}
-}
-
-pub fn tipekeg_from_str(tk string) TipeKeg {
-	return match tk {
-		'Penyedia' { TipeKeg.pyd }
-		'Swakelola' { TipeKeg.swa }
-		'Penyedia dalam Swakelola' { TipeKeg.pds }
-		else { TipeKeg.swa }
-	}
-}
-
-enum JnsRekap {
-	anggaran_sekbm
-	anggaran_satker
-	kegiatan_sekbm
-	kegiatan_satker
-}
-
-pub fn (jk JnsRekap) str() string {
-	return match jk {
-		.anggaran_sekbm { 'Rekap anggaran kabupaten' }
-		.anggaran_satker { 'Rekap anggaran semua satker' }
-		.kegiatan_sekbm { 'Rekap kegiatan kabupaten' }
-		.kegiatan_satker { 'Rekap kegiatan semua satker' }
-	}
-}
-
-pub struct Kegiatan {
-	keg        TipeKeg
-	per_satker bool
-	id_satker  string
-}
-
-pub struct Rekap {
-	jk JnsRekap
-}
-
-type Tipe = Kegiatan | Rekap
 
 // ["D128","Pemerintah Daerah Kabupaten Kebumen",
 // "130579571100","76459681099","2316174000","209355426199"]

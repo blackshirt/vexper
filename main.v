@@ -10,8 +10,8 @@ fn main() {
 	db := sqlite.connect('db.sqlite3') or { panic(err) }
 	c := url.CPool{db, true}
 	/*
-	jk := url.Rekap{.kegiatan_satker}
-	rek := url.fetch('2021', jk)  or {return}
+	jnr := url.OpsiRekap{.kegiatan_satker}
+	rek := url.fetch('2021', jnr)  or {return}
 	res := url.parse_response(rek) or {return}
 	data := res.data()
 	mut stk := []url.RekapKegiatanSatker{}
@@ -19,17 +19,19 @@ fn main() {
 		m := item as url.RekapKegiatanSatker
 		stk << m
 	}
-	c.save_kegiatan_satker(stk)'
+	c.save_kegiatan_satker(stk)
 	*/
 	
 	//println(stk)
-	res := url.fetch_all_rup_from_satker('63406', '2021') or {return}
+	//res := url.fetch_all_rup_from_satker('63406', '2021') or {return}
 	//println(res)
-	rups := url.parse_all_rup_from_satker(res, '63406', '2021') or {return}
+	//rups := url.parse_all_rup_from_satker(res, '63406', '2021') or {return}
 	//for rup in rups {
 	//	println(rup)
 	//}
 	//println(rups)
+	res := url.all_rup('2021') ?
+	rups := url.parse_all_rup(res) ?
 	c.save_rup(rups)
 	//res := c.daftar_satker()
 	//println(res)

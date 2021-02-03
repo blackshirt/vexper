@@ -16,14 +16,38 @@ pub fn (rs Result) data() []Store {
 type Store = RekapAnggaranKbm | RekapAnggaranSatker | RekapKegiatanKbm | RekapKegiatanSatker |
 	Rup
 
+// `parse_all_rup_from_satker` parse response data dari satker `id_satker` dalam `ds` ke dalam array `Rup` struct
+pub fn parse_all_rup_from_satker(ds []Response, id_satker string, tahun string) ?[]Rup {
+	mut results := []Rup{}
+	for resp in ds {
+		tipe := resp.opsi as OpsiKegiatan
+		keg := tipe.keg
+		rups := parse_persatker_bytipe(keg, resp.body, id_satker, tahun) ?
+		results << rups
+	}
+	return results
+}
+
+// `parse_all_rup` parse response data dalam `ds` ke dalam array `Rup` struct
+pub fn parse_all_rup(ds []Response) ?[]Rup {
+	mut results := []Rup{}
+	for resp in ds {
+		tipe := resp.opsi as OpsiKegiatan
+		keg := tipe.keg
+		rups := parse_allsatker_bytipe(keg, resp.body,resp.tahun) ?
+		results << rups
+	}
+	return results
+}
+
 // parse_response parses responses data from the results of fetch operation in `
-// XResponse` `r` params and return `Result`, underlying data stored in result `data` 
+// Response` `r` params and return `Result`, underlying data stored in result `data` 
 // with len `len`
-pub fn parse_response(r XResponse) ?Result {
-	if r.opt is Kegiatan {
+pub fn parse_response(r Response) ?Result {
+	if r.opsi is OpsiKegiatan {
 		mut res := Result{}
-		if r.opt.per_satker {
-			rup := parse_persatker_bytipe(r.opt.keg, r.body, r.opt.id_satker, r.tahun) ?
+		if r.opsi.per_satker {
+			rup := parse_persatker_bytipe(r.opsi.keg, r.body, r.opsi.id_satker, r.tahun) ?
 			mut w := []Store{}
 			for i in rup {
 				k := Store(i)
@@ -33,7 +57,7 @@ pub fn parse_response(r XResponse) ?Result {
 			res.len = rup.len
 			return res
 		} else {
-			rup := parse_allsatker_bytipe(r.opt.keg, r.body, r.tahun) ?
+			rup := parse_allsatker_bytipe(r.opsi.keg, r.body, r.tahun) ?
 			mut w := []Store{}
 			for i in rup {
 				k := Store(i)
@@ -44,8 +68,8 @@ pub fn parse_response(r XResponse) ?Result {
 			return res
 		}
 	}
-	if r.opt is Rekap {
-		match r.opt.jk {
+	if r.opsi is OpsiRekap {
+		match r.opsi.jnr {
 			.anggaran_sekbm {
 				mut res := Result{}
 				data := parse_anggaran_sekbm(r.body, r.tahun) ?
@@ -95,6 +119,7 @@ pub fn parse_response(r XResponse) ?Result {
 				res.len = k.len
 				return res
 			}
+		
 		}
 	}
 }
