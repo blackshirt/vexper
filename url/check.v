@@ -1,13 +1,5 @@
 module url
 
-import sqlite
-
-pub struct CPool {
-	sqlite.DB
-mut:
-	use_safe_ops bool
-}
-
 fn (c CPool) kldi_exist_dikegiatan(kode_kldi string) bool {
 	q := "SELECT EXISTS(SELECT 1 FROM RekapKegiatanKbm WHERE kode_kldi='${kode_kldi}' LIMIT 1);"
 	res := c.q_int(q)

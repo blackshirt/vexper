@@ -1,8 +1,6 @@
 module url
 
-
-
-pub fn (c CPool) save_rup(mut rups []Rup) {
+pub fn (c CPool) save_rup(rups []Rup) {
 	if rups.len == 0 {
 		return
 	}
@@ -20,15 +18,13 @@ pub fn (c CPool) save_rup(mut rups []Rup) {
 			} else {
 				// rup not exist
 				if rup.kode_satker == '' {
-					qr := "SELECT kode_satker FROM RekapKegiatanSatker WHERE nama_satker='$rup.nama_satker' LIMIT 1"
+					qr := "SELECT kode_satker FROM RekapKegiatanSatker WHERE nama_satker='${rup.nama_satker}' LIMIT 1"
 					kode_satker := c.q_string(qr)
 					if kode_satker != '' {
 						rup.kode_satker = kode_satker
-					} else {
-						eprintln('error kode satker')
-						return
-					}
+					} 
 				}
+				
 				// tipe := c.q_string
 				q := "insert into Rup(kode_rup, nama_paket, pagu, awal_pemilihan, \
 				metode, sumber_dana, kegiatan, kode_satker, year, last_updated, tipe) \
@@ -39,7 +35,7 @@ pub fn (c CPool) save_rup(mut rups []Rup) {
 				on conflict do nothing"
 				
 				_, code := c.exec(q)
-				println('Inserting - $code')
+				println('Inserting $q - $code')
 			}
 		} else {
 			eprintln('Nothing todo')

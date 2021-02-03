@@ -84,3 +84,33 @@ fn fetch_allsatker(tpk TipeKeg, tahun string) ?Response {
 	resp.body = text
 	return resp
 }
+
+
+pub fn fetch_all_rup_from_satker(id_satker string, tahun string) ?[]XResponse {
+	if tahun == '' || id_satker == '' {
+		eprintln('error empty field required')
+		return error("error empty field required")
+	}
+	mut xres := []XResponse{}
+	for item in [TipeKeg.pyd, TipeKeg.swa, TipeKeg.pds] {
+		mut x := XResponse{}
+		resp := fetch_persatker(item, id_satker, tahun)?
+		x.url = resp.url
+		x.tahun = resp.tahun // tahun
+		x.body = resp.body
+		x.opt = Kegiatan{item, false, id_satker}
+		xres << x
+	}
+	return xres
+}
+
+pub fn parse_all_rup_from_satker(data []XResponse, id_satker string, tahun string) ?[]Rup {
+	mut results := []Rup{}
+	for xres in data {
+		tipe := xres.opt as Kegiatan
+		keg := tipe.keg
+		rups := parse_persatker_bytipe(keg, xres.body, id_satker, tahun)?
+		results << rups
+	}
+	return results
+}

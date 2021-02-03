@@ -159,3 +159,10 @@ FROM
     `Rup`
     INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode_satker = Rup.kode_satker
     INNER JOIN jenis ON jenis.jid = Rup.jenis;
+
+CREATE VIEW IF NOT EXISTS `v_all_satker` AS
+SELECT
+    RekapKegiatanSatker.kode_satker AS kode_satker,
+    RekapKegiatanSatker.nama_satker AS nama_satker
+FROM
+    `RekapKegiatanSatker`;
