@@ -9,23 +9,34 @@ struct UniDiff {
 struct DiffStat {
 	mut:
 	kode_satker string
-	nama_satker string
-	diffdata    []map[string][][]string
+	diff_data    []map[string][][]string
 	// {'kode_rup' : [['column_name', 'db_value', 'outer_value'], ['column 2', 'oldval','newval']]}
 }
 
-pub fn (c CPool) compare(exout []Rup) ?DiffStat {
+pub fn (c CPool) compare(rups []Rup) ?DiffStat {
 	mut diffstat := DiffStat{}
-	for rup in exout {
+	for rup in rups {
 		diff := c.compare_rup(rup) ?
 		diffstat.kode_satker = rup.kode_satker
-		diffstat.nama_satker = rup.nama_satker
+		if diff.diff_vals.len == 0 {
+			continue
+		}
 		mut diffmap := map[string][][]string{}
 		diffmap[diff.kode_rup] = diff.diff_vals
 		
-		diffstat.diffdata << diffmap
+		diffstat.diff_data << diffmap
 	}
 	return diffstat
+}
+
+fn (c CPool) columns(table string) []string {
+	mut cols := []string{}
+	q := "select name from pragma_table_info('${table}')"
+	rows, _ := c.exec(q)
+	for item in rows {
+		cols << item.vals[0]
+	}
+	return cols
 }
 
 pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
@@ -33,22 +44,17 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 	// id,kode_rup,nama_paket,sumber_dana,pagu,awal_pemilihan,tipe,kegiatan,\
 	// nama_satker,kode_satker,metode,jenis,tahun,last_updated
 	mut diff := UniDiff{}
+	//cols := c.columns('v_rups')
+	//println('pragma column name .... $cols')
 	if c.rup_withkode_exist(ex.kode_rup) {
 		// get the rup from db 
 		q := "select kode_rup, nama_paket, sumber_dana, pagu, awal_pemilihan, \
-		tipe, kegiatan, nama_satker, kode_satker, metode, jenis, tahun, \
-		last_updated from v_rups where kode_rup='$ex.kode_rup' limit 1"
+		tipe, kegiatan, nama_satker, kode_satker, metode, jenis, tahun \
+		from v_rups where kode_rup='${ex.kode_rup}' limit 1"
 		row := c.exec_one(q) ?// sqlite.Row ==> vals []string
 		// perform checking 
-		cln, _ := c.exec("select name from pragma_table_info('v_rups')") // []sqlite.Row
-		mut cols := []string{}
-		for item in cln {
-			cols << item.vals[0]
-		}
-		println('pragma column name .... $cols')
-		
+				
 		diff.kode_rup = row.vals[0]
-
 		mut diffarray := [][]string{}
 
 		// cek nama paket
@@ -56,7 +62,7 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[1]
 			new_val := ex.nama_paket
 			mut vals := []string{}
-			vals << cols[2] // add column name
+			vals << 'nama_paket' // add column name
 			vals << old_val
 			vals << new_val
 			diffarray << vals
@@ -66,7 +72,7 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[2]
 			new_val := ex.sumber_dana
 			mut vals := []string{}
-			vals << cols.vals[3] 
+			vals << 'sumber_dana' 
 			vals << old_val
 			vals << new_val
 			diffarray << vals
@@ -76,7 +82,7 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[3]
 			new_val := ex.pagu
 			mut vals := []string{}
-			vals << cols.vals[4] 
+			vals << 'pagu'
 			vals << old_val
 			vals << new_val
 			diffarray << vals
@@ -86,7 +92,7 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[4]
 			new_val := ex.awal_pemilihan
 			mut vals := []string{}
-			vals << cols.vals[5] 
+			vals << 'awal_pemilihan' 
 			vals << old_val
 			vals << new_val
 			diffarray << vals
@@ -96,7 +102,7 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[5]
 			new_val := ex.tipe
 			mut vals := []string{}
-			vals << cols.vals[6] 
+			vals << 'tipe'
 			vals << old_val
 			vals << new_val
 			diffarray << vals
@@ -106,19 +112,19 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[6]
 			new_val := ex.kegiatan
 			mut vals := []string{}
-			vals << cols.vals[7] 
+			vals << 'kegiatan' 
 			vals << old_val
 			vals << new_val
 			diffarray << vals
 		}
 		// 7 nama satker skip
 		// 8 kode_satker skip
-		// metode
+		// 9 metode
 		if row.vals[9] != ex.metode {
 			old_val := row.vals[9]
 			new_val := ex.metode
 			mut vals := []string{}
-			vals << cols.vals[10] 
+			vals << 'metode'
 			vals << old_val
 			vals << new_val
 			diffarray << vals
@@ -128,22 +134,24 @@ pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
 			old_val := row.vals[10]
 			new_val := ex.jenis.str()
 			mut vals := []string{}
-			vals << cols.vals[11] 
+			vals << 'jenis' 
 			vals << old_val
 			vals << new_val
 			diffarray << vals
 		}
 		// 11 tahun skip
-		// 12 last_updated
+		// 12 last_updated skipped
+		/*
 		if row.vals[12] != ex.last_updated {
 			old_val := row.vals[12]
 			new_val := ex.last_updated
 			mut vals := []string{}
-			vals << cols.vals[13] 
+			vals << cols[13] 
 			vals << old_val
 			vals << new_val
 			diffarray << vals
 		}
+		*/
 		diff.diff_vals = diffarray
 	}
 	return diff

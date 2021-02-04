@@ -23,11 +23,16 @@ fn main() {
 	*/
 	
 	//println(stk)
-	res := url.all_rup_from_satker('63401', '2021') or {return}
-	//println(res)
-	rups := url.parse_all_rup_from_satker(res, '63401', '2021') or {return}
-	diff := c.compare(rups) or {return}
-	println(diff)
+	res := url.all_rup_from_satker('63408', '2021') or {panic(err)}
+	//println("Fetch ....$res")
+	rups := url.parse_all_rup_from_satker(res) or {panic(err)}
+	c.save_rup(rups)
+	//println("Rups....$rups")
+	//println("from db")
+	//dbrup := c.rup_from_satker('99566')
+	//println("rup from db....$dbrup")
+	//diff := c.compare(rups) or {panic(err)}
+	//println(diff)
 	//for rup in rups {
 	//	println(rup)
 	//}

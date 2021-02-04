@@ -61,12 +61,6 @@ mut:
 	opsi  OpsiTipe
 }
 
-// eXtended Response
-struct XResponse {
-	Response
-mut:
-	opsi OpsiTipe
-}
 
 // fetch fetch up rup data for specific `tahun` and provided options `opsi`
 // The `opsi` accepts sum type in the form `OpsiKegiatan` and `OpsiRekap` type and return response with 
@@ -82,7 +76,7 @@ pub fn fetch(tahun string, opsi OpsiTipe) ?Response {
 		if opsi.per_satker {
 			if opsi.id_satker == '' {
 				eprintln('error empty field required')
-				return error('"error empty field required"')
+				return error("error empty field required")
 			}
 			url := persatker_url_bytipe(opsi.keg, opsi.id_satker, tahun) ?
 			text := http.get_text(url)

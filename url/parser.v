@@ -17,12 +17,12 @@ type Store = RekapAnggaranKbm | RekapAnggaranSatker | RekapKegiatanKbm | RekapKe
 	Rup
 
 // `parse_all_rup_from_satker` parse response data dari satker `id_satker` dalam `ds` ke dalam array `Rup` struct
-pub fn parse_all_rup_from_satker(ds []Response, id_satker string, tahun string) ?[]Rup {
+pub fn parse_all_rup_from_satker(ds []Response) ?[]Rup {
 	mut results := []Rup{}
 	for resp in ds {
-		tipe := resp.opsi as OpsiKegiatan
-		keg := tipe.keg
-		rups := parse_persatker_bytipe(keg, resp.body, id_satker, tahun) ?
+		ops := resp.opsi as OpsiKegiatan
+		//keg := tipe.keg
+		rups := parse_persatker_bytipe(ops.keg, resp.body, ops.id_satker, resp.tahun) ?
 		results << rups
 	}
 	return results
@@ -261,14 +261,14 @@ fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	data := dval.raw_data
 	for item in data {
 		mut rup := Rup{}
-		// typical item ["24957218","Penyediaan Layanan Kesehatan Untuk UKM dan UKP Rujukan Tingkat Daerah Kabupaten/Kota",
-		// "Operasional Pelayanan Puskesmas","1256422000","BLUD","24957218","January 2021"]
+		// typical item [ "25309967", "Pelaksanaan Kebijakan Kesejahteraan Rakyat", "Honorarium Narasumber atau pembahas , 
+		// Moderator, Pembawa acara,dan Panitia", "37250000", "APBD", "25309967", "March 2021" ]
 		rup.kode_rup = item[0]
 		// todo: 
 		// rup.nama_satker = select nama_satker from RekapKegiatanSatker where kode_satker=id_satker
-		rup.nama_paket = item[1]
+		rup.kegiatan = item[1]
+		rup.nama_paket = item[2]
 		rup.kode_satker = id_satker
-		rup.kegiatan = item[2]
 		rup.pagu = item[3]
 		// rup.metode not avaliable in swa, diisi Swakelola ?
 		rup.metode = 'Swakelola'

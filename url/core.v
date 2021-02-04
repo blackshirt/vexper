@@ -193,7 +193,7 @@ pub fn (mp MePeng) str() string {
 	return match mp {
 		.tender { 'Tender' }
 		.swakelola { 'Swakelola' }
-		.epurchasing { 'e-Purchasing' }
+		.epurchasing { 'E-Purchasing' }
 		.tendercepat { 'Tender Cepat' }
 		.dikecualikan { 'Dikecualikan' }
 		.pengadaanlangsung { 'Pengadaan Langsung' }
@@ -205,7 +205,7 @@ pub fn method_from_str(m string) MePeng {
 	return match m {
 		'Tender' { MePeng.tender }
 		'Swakelola' { MePeng.swakelola }
-		'e-Purchasing' { MePeng.epurchasing }
+		'E-Purchasing' { MePeng.epurchasing }
 		'Tender Cepat' { MePeng.tendercepat }
 		'Dikecualikan' { MePeng.dikecualikan }
 		'Pengadaan Langsung' { MePeng.pengadaanlangsung }
