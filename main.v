@@ -23,18 +23,21 @@ fn main() {
 	*/
 	
 	//println(stk)
-	//res := url.fetch_all_rup_from_satker('63406', '2021') or {return}
+	res := url.all_rup_from_satker('63401', '2021') or {return}
 	//println(res)
-	//rups := url.parse_all_rup_from_satker(res, '63406', '2021') or {return}
+	rups := url.parse_all_rup_from_satker(res, '63401', '2021') or {return}
+	diff := c.compare(rups) or {return}
+	println(diff)
 	//for rup in rups {
 	//	println(rup)
 	//}
 	//println(rups)
-	res := url.all_rup('2021') ?
-	rups := url.parse_all_rup(res) ?
-	c.save_rup(rups)
+	//res := url.all_rup('2021') ?
+	//rups := url.parse_all_rup(res) ?
+	//c.save_rup(rups)
 	//res := c.daftar_satker()
 	//println(res)
+	
 }
 
 /*

@@ -40,8 +40,8 @@ pub fn parse_all_rup(ds []Response) ?[]Rup {
 	return results
 }
 
-// parse_response parses responses data from the results of fetch operation in `
-// Response` `r` params and return `Result`, underlying data stored in result `data` 
+// `parse_response` parses responses data from the results of fetch operation in 
+// Response `r` params and return `Result`, underlying data stored in result `data` 
 // with len `len`
 pub fn parse_response(r Response) ?Result {
 	if r.opsi is OpsiKegiatan {
@@ -124,6 +124,7 @@ pub fn parse_response(r Response) ?Result {
 	}
 }
 
+// `parse_persatker_bytipe` parse rup dengan tipe `t` dari satker `id_satker` pada `tahun` yang ditentukan
 fn parse_persatker_bytipe(t TipeKeg, src string, id_satker string, tahun string) ?[]Rup {
 	match t {
 		.pyd { return parse_pyd_persatker(src, id_satker, tahun) }

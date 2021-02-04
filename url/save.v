@@ -1,11 +1,11 @@
 module url
 
-pub fn (c CPool) save_rup(mut rups []Rup) {
+pub fn (c CPool) save_rup(rups []Rup) {
 	if rups.len == 0 {
 		return
 	}
 	c.exec('BEGIN TRANSACTION')
-	for mut rup in rups {
+	for rup in rups {
 		if c.use_safe_ops {
 			if c.rup_withkode_exist(rup.kode_rup) {
 				q := "update Rup set nama_paket = '$rup.nama_paket', pagu = '$rup.pagu', \
@@ -17,25 +17,19 @@ pub fn (c CPool) save_rup(mut rups []Rup) {
 				println('update ... $code')
 			} else {
 				// rup not exist
-				if rup.kode_satker == '' {
-					qr := "SELECT kode_satker FROM RekapKegiatanSatker WHERE nama_satker='${rup.nama_satker}' LIMIT 1"
-					kode_satker := c.q_string(qr)
-					if kode_satker != '' {
-						rup.kode_satker = kode_satker
-					} 
-				}
+				// check kode satker jika kosong
+				rp := c.prepare_rup(rup)
 				
-				// tipe := c.q_string
 				q := "insert into Rup(kode_rup, nama_paket, pagu, awal_pemilihan, \
 				metode, sumber_dana, kegiatan, kode_satker, year, last_updated, tipe) \
-				values('${rup.kode_rup}', '${rup.nama_paket}', '${rup.pagu}', \
-				'${rup.awal_pemilihan}', '${rup.metode}', '${rup.sumber_dana}', \
-				'${rup.kegiatan}', '${rup.kode_satker}', '${rup.year}', \
-				'${rup.last_updated}', '${rup.tipe}') \
+				values('${rp.kode_rup}', '${rp.nama_paket}', '${rp.pagu}', \
+				'${rp.awal_pemilihan}', '${rp.metode}', '${rp.sumber_dana}', \
+				'${rp.kegiatan}', '${rp.kode_satker}', '${rp.year}', \
+				'${rp.last_updated}', '${rp.tipe}') \
 				on conflict do nothing"
 				
 				_, code := c.exec(q)
-				println('Inserting $q - $code')
+				println('Inserting ... ${rup.kode_rup} ..- $code')
 			}
 		} else {
 			eprintln('Nothing todo')

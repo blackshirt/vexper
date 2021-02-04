@@ -206,7 +206,7 @@ pub fn all_rup(tahun string) ?[]Response {
 
 // `all_rup_from_satker` berguna untuk mengambil data rup keseluruhan pada satker dengan 
 // kode `id_satker` pada `tahun` yang ditentukan
-fn all_rup_from_satker(id_satker string, tahun string) ?[]Response {
+pub fn all_rup_from_satker(id_satker string, tahun string) ?[]Response {
 	if tahun == '' || id_satker == '' {
 		eprintln('error empty field required')
 		return error('error empty field required')
@@ -224,39 +224,3 @@ fn all_rup_from_satker(id_satker string, tahun string) ?[]Response {
 	}
 	return resp
 }
-
-/*
-fn fetch_rekap(jnr JnsRekap, tahun string) ?Response {
-	mut resp := Response{}
-	resp.tahun = tahun
-	url := rekap_url_byjenis(jnr, tahun) ?
-	text := http.get_text(url)
-	resp.url = url
-	resp.body = text
-	return resp
-}
-
-fn fetch_persatker(tpk TipeKeg, id_satker string, tahun string) ?Response {
-	if tahun == '' || id_satker == '' {
-		eprintln('error empty field required')
-		return error('"error empty field required"')
-	}
-	mut resp := Response{}
-	resp.tahun = tahun
-	url := persatker_url_bytipe(tpk, id_satker, tahun) ?
-	text := http.get_text(url)
-	resp.url = url
-	resp.body = text
-	return resp
-}
-
-fn fetch_allsatker(tpk TipeKeg, tahun string) ?Response {
-	mut resp := Response{}
-	resp.tahun = tahun
-	url := allsatker_url_bytipe(tpk, tahun) ?
-	text := http.get_text(url)
-	resp.url = url
-	resp.body = text
-	return resp
-}
-*/
