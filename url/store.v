@@ -8,7 +8,18 @@ mut:
 	use_safe_ops bool
 }
 
+// `columns` untuk mendapatkan daftar kolom dari table `table`
+fn (c CPool) columns(table string) []string {
+	mut cols := []string{}
+	q := "select name from pragma_table_info('${table}')"
+	rows, _ := c.exec(q)
+	for item in rows {
+		cols << item.vals[0]
+	}
+	return cols
+}
 
+// `daftar_satker` untuk mengambil data daftar satker yang ada dalam bentuk `map[kode_satker]nama_satker`
 pub fn (c CPool) daftar_satker() map[string]string {
 	mut m := map[string]string{}
 	q := 'select kode_satker, nama_satker from v_all_satker'

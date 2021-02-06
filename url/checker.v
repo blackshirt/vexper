@@ -1,20 +1,20 @@
 module url
 
-struct UniDiff {
+struct RupDiff {
 	mut:
 	kode_rup  string
 	diff_vals [][]string
 }
 
-struct DiffStat {
+struct SatkerDiff {
 	mut:
 	kode_satker string
 	diff_data    []map[string][][]string
 	// {'kode_rup' : [['column_name', 'db_value', 'outer_value'], ['column 2', 'oldval','newval']]}
 }
 
-pub fn (c CPool) compare(rups []Rup) ?DiffStat {
-	mut diffstat := DiffStat{}
+pub fn (c CPool) compare(rups []Rup) ?SatkerDiff {
+	mut diffstat := SatkerDiff{}
 	for rup in rups {
 		diff := c.compare_rup(rup) ?
 		diffstat.kode_satker = rup.kode_satker
@@ -29,21 +29,14 @@ pub fn (c CPool) compare(rups []Rup) ?DiffStat {
 	return diffstat
 }
 
-fn (c CPool) columns(table string) []string {
-	mut cols := []string{}
-	q := "select name from pragma_table_info('${table}')"
-	rows, _ := c.exec(q)
-	for item in rows {
-		cols << item.vals[0]
-	}
-	return cols
-}
 
-pub fn (c CPool) compare_rup(ex Rup) ?UniDiff {
+// `compare_rup` untuk membandingkan (compare) antara rup hasil fetch dalam parameter `ex` 
+// dan membandingkannya dengan rup terkait yang ada di database
+ pub fn (c CPool) compare_rup(ex Rup) ?RupDiff {
 	// sqlite> select group_concat(name) from pragma_table_info('v_rups');
 	// id,kode_rup,nama_paket,sumber_dana,pagu,awal_pemilihan,tipe,kegiatan,\
 	// nama_satker,kode_satker,metode,jenis,tahun,last_updated
-	mut diff := UniDiff{}
+	mut diff := RupDiff{}
 	//cols := c.columns('v_rups')
 	//println('pragma column name .... $cols')
 	if c.rup_withkode_exist(ex.kode_rup) {

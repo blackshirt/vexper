@@ -39,7 +39,7 @@ VALUES
     ),
     (
         4,
-        "E-Purchasing",
+        "e-Purchasing",
         "e-Purchasing aka e-catalog"
     ),
     (
@@ -166,3 +166,28 @@ SELECT
     RekapKegiatanSatker.nama_satker AS nama_satker
 FROM
     `RekapKegiatanSatker`;
+
+CREATE VIEW IF NOT EXISTS `v_stat_paket_by_tipe_n_metode` AS
+select
+    tipe,
+    metode,
+    count(*) as total_paket,
+    sum(count(*)) over() as total_seluruh_paket round(100.0 * count(*) / sum(count(*)) over(), 2) as percent_paket
+from
+    v_rups
+group by
+    metode,
+    tipe;
+
+CREATE VIEW IF NOT EXISTS `v_stat_pagu_by_tipe_n_metode` AS
+select
+    tipe,
+    metode,
+    sum(pagu) as total_pagu,
+    sum(sum(pagu)) over() as total_seluruh_pagu,
+    round(100.0 * sum(pagu) / sum(sum(pagu)) over(), 2) as percent_pagu
+from
+    v_rups
+group by
+    metode,
+    tipe
