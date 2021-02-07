@@ -8,6 +8,30 @@ mut:
 	use_safe_ops bool
 }
 
+
+pub fn (c CPool) rup(kode_rup string) ?Rup {
+	if c.rup_withkode_exist(kode_rup) {
+		q := "select nama_satker, kode_satker, kode_rup, nama_paket, \
+			sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, \
+			metode, tahun, last_updated from v_rups where kode_rup='${kode_rup}' limit 1"
+		row := c.exec_one(q)?
+		mut rup := Rup{}
+		rup.nama_satker = row.vals[0]
+		rup.kode_satker = row.vals[1]
+		rup.kode_rup = row.vals[2]
+		rup.nama_paket = row.vals[3]
+		rup.sumber_dana = row.vals[4]
+		rup.pagu = row.vals[5]
+		rup.awal_pemilihan = row.vals[6]
+		rup.tipe = row.vals[7]
+		rup.kegiatan = row.vals[8]
+		rup.metode = row.vals[9]
+		rup.year = row.vals[10]
+		rup.last_updated = row.vals[11]
+		return rup
+	}
+	return error("rup with kode rup ${kode_rup} doesn't exist in db")
+}
 // `columns` untuk mendapatkan daftar kolom dari table `table`
 fn (c CPool) columns(table string) []string {
 	mut cols := []string{}

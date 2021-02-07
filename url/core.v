@@ -88,26 +88,29 @@ enum JenPeng {
 	konsultansi
 	jasalainnya
 	sayembara
+	swakelola
 }
 
 fn (j JenPeng) str() string {
 	return match j {
 		.unknown { 'Unknown' }
 		.barang { 'Barang' }
-		.konstruksi { 'Konstruksi' }
-		.konsultansi { 'Konsultansi' }
-		.jasalainnya { 'Jasa lainnya' }
+		.konstruksi { 'Pekerjaan Konstruksi' }
+		.konsultansi { 'Jasa Konsultansi' }
+		.jasalainnya { 'Jasa Lainnya' }
 		.sayembara { 'Sayembara' }
+		.swakelola { 'Swakelola' }
 	}
 }
 
 fn jenis_pengadaan_from_str(jp string) JenPeng {
 	return match jp {
 		'Barang' { JenPeng.barang }
-		'Konstruksi' { JenPeng.konstruksi }
-		'Konsultansi' { JenPeng.konsultansi }
-		'Jasa lainnya' { JenPeng.jasalainnya }
+		'Pekerjaan Konstruksi' { JenPeng.konstruksi }
+		'Jasa Konsultansi' { JenPeng.konsultansi }
+		'Jasa Lainnya' { JenPeng.jasalainnya }
 		'Sayembara' { JenPeng.sayembara }
+		'Swakelola' {JenPeng.swakelola}
 		else { JenPeng.unknown }
 	}
 }
