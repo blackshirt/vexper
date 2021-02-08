@@ -1,6 +1,6 @@
 import url
-import sqlite
-import sync
+//import sqlite
+//import sync
 /*
 import sqlite
 import nedpals.vex.router
@@ -8,22 +8,41 @@ import nedpals.vex.server
 import nedpals.vex.ctx
 */
 fn main() {
-	db := sqlite.connect('db.sqlite3') or { panic(err) }
-	c := url.CPool{db, true}
+	//db := sqlite.connect('db.sqlite3') or { panic(err) }
+	//c := url.CPool{db, true}
 	//rup := c.rup('27037643') or { return }
 	//jp := url.jenpeng_for_rup(rup) or {return}
 	//println(jp)
-	rups := c.rup_from_satker('63421')
-	urls := url.build_jenis_url_for_rups(rups) or {return}
-	mut wg := sync.new_waitgroup()
-	mut sto := []string{}
+	//rups := c.rup_from_satker('63421')
+	//urls := url.build_jenis_url_for_rups(rups) or {return}
+	//first_5urls := urls[..4]
+	//println(first_5urls)
+	jnres := chan url.DetailResult{}
+	u := url.detail_rup_url(.swa, '24963811') or {return}
+	println(u)
+	go url.send_request(u, jnres)
+	mut result := url.DetailResult{}
+	result = <- jnres
+	//println(dr)
+	sisa := result.decode_detail()
+	println(sisa)
+	jnres.close()
+	/*
 	for i in urls {
-		wg.add(1)
-		h := go url.send_request(i, mut wg)
-		sto << h
+		go url.send_request(i, jnres)
 	}
-	wg.wait()
-	println(sto)
+	mut res := []url.DetailResult{}
+	for i := 0; i < urls.len; i++ {
+		item := <- jnres
+		res << item
+	}
+	for u in res {
+		println(u.url)
+	}
+	*/
+	//res := url.jenpeng_array_rup(rups, jnres) ?
+	//jnres.close()
+	//println(res)
 	//println(urls)
 	//println(rups)
 	//mjp := url.jenpeng_array_rup(rups) or {return }
