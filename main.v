@@ -1,5 +1,5 @@
 import url
-//import sqlite
+import sqlite
 //import sync
 /*
 import sqlite
@@ -8,25 +8,30 @@ import nedpals.vex.server
 import nedpals.vex.ctx
 */
 fn main() {
-	//db := sqlite.connect('db.sqlite3') or { panic(err) }
-	//c := url.CPool{db, true}
-	//rup := c.rup('27037643') or { return }
+	db := sqlite.connect('db.sqlite3') or { panic(err) }
+	c := url.CPool{db, true}
+	rup := c.rup_with_kode('27034193') or { panic(err) }
 	//jp := url.jenpeng_for_rup(rup) or {return}
 	//println(jp)
 	//rups := c.rup_from_satker('63421')
 	//urls := url.build_jenis_url_for_rups(rups) or {return}
 	//first_5urls := urls[..4]
 	//println(first_5urls)
-	jnres := chan url.DetailResult{}
-	u := url.detail_rup_url(.swa, '24963811') or {return}
-	println(u)
-	go url.send_request(u, jnres)
-	mut result := url.DetailResult{}
-	result = <- jnres
+	
+	//jnres := chan url.DetailResult{}
+	//u := url.detail_rup_url(.pyd, '27219230') or {return}
+	res := url.fetch_detail(rup) or {return}
+	println(res)
+	//println(u)
+	//go url.send_request(u, jnres)
+	//mut result := url.DetailResult{}
+	//result = <- jnres
 	//println(dr)
-	sisa := result.decode_detail()
+	sisa := res.decode_detail()
 	println(sisa)
-	jnres.close()
+	//jnres.close()
+	
+	
 	/*
 	for i in urls {
 		go url.send_request(i, jnres)

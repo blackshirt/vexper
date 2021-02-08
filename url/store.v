@@ -9,7 +9,7 @@ mut:
 }
 
 
-pub fn (c CPool) rup(kode_rup string) ?Rup {
+pub fn (c CPool) rup_with_kode(kode_rup string) ?Rup {
 	if c.rup_withkode_exist(kode_rup) {
 		q := "select nama_satker, kode_satker, kode_rup, nama_paket, \
 			sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, \
@@ -32,6 +32,7 @@ pub fn (c CPool) rup(kode_rup string) ?Rup {
 	}
 	return error("rup with kode rup ${kode_rup} doesn't exist in db")
 }
+
 // `columns` untuk mendapatkan daftar kolom dari table `table`
 fn (c CPool) columns(table string) []string {
 	mut cols := []string{}
