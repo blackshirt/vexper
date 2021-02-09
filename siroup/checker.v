@@ -161,7 +161,7 @@ fn (c CPool) kldi_exist_dikegiatan(kode_kldi string) bool {
 }
 
 fn (c CPool) satker_exist_dikegiatan(kode_satker string) bool {
-	q := "SELECT EXISTS(SELECT 1 FROM RekapKegiatanSatker WHERE kode_satker='$kode_satker' LIMIT 1);"
+	q := "SELECT EXISTS(SELECT 1 FROM RekapKegiatanSatker WHERE kode_satker='${kode_satker}' LIMIT 1);"
 	res := c.q_int(q)
 	if res == 1 {
 		return true

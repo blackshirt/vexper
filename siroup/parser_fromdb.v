@@ -7,7 +7,18 @@ pub struct CPool {
 mut:
 	use_safe_ops bool
 }
-
+fn (c CPool) koderup_from_satker(kode_satker string) ?[]string {
+	if c.satker_exist_dikegiatan(kode_satker) {
+		mut krups := []string{}
+		q := "select kode_rup from v_rups where kode_satker='${kode_satker}'"
+		rows, _ := c.exec(q)
+		for row in rows {
+			krups << row.vals[0]
+		}
+		return krups
+	}
+	return error("Satker ${kode_satker} tidak ada di database")
+}
 
 pub fn (c CPool) rup_with_kode(kode_rup string) ?Rup {
 	if c.rup_withkode_exist(kode_rup) {

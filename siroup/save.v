@@ -21,11 +21,12 @@ pub fn (c CPool) save_rup(rups []Rup) {
 				rp := c.prepare_rup(rup)
 				
 				q := "insert into Rup(kode_rup, nama_paket, pagu, awal_pemilihan, \
-				metode, sumber_dana, kegiatan, kode_satker, year, last_updated, tipe) \
+				metode, sumber_dana, kegiatan, kode_satker, year, last_updated, tipe, \
+				tipe_swakelola, jenis) \
 				values('${rp.kode_rup}', '${rp.nama_paket}', '${rp.pagu}', \
 				'${rp.awal_pemilihan}', '${rp.metode}', '${rp.sumber_dana}', \
 				'${rp.kegiatan}', '${rp.kode_satker}', '${rp.year}', \
-				'${rp.last_updated}', '${rp.tipe}') \
+				'${rp.last_updated}', '${rp.tipe}', '${rp.tipe_swakelola}', '${rp.jenis}') \
 				on conflict do nothing"
 				
 				_, code := c.exec(q)

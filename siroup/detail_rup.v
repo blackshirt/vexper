@@ -173,7 +173,7 @@ pub fn detail_rup_url(tpk TipeKeg, kode_rup string) ?string {
 	return error('Not matching tipe kegiatan or kode rup')
 }
 
-pub fn build_jenis_url_for_rups(rups []Rup) ?[]string {
+fn build_jenis_url_for_rups(rups []Rup) ?[]string {
 	mut res := []string{}
 	for rup in rups {
 		url := detail_rup_url(tipekeg_from_str(rup.tipe), rup.kode_rup) ?
@@ -197,7 +197,17 @@ pub fn fetch_detail(rup Rup) ?DetailResult {
 	return dr
 }
 
-pub fn send_request(url string, jrschan chan DetailResult) {
+fn (c CPool) fetch_detail_from_satker(kode_satker string) ?[]DetailResult {
+	rups := c.rup_from_satker(kode_satker)?
+	mut drs := []DetailResult{}
+	for rup in rups {
+		dr := fetch_detail(rup)?
+		drs << dr
+	}
+	return drs
+}
+
+fn send_request(url string, jrschan chan DetailResult) {
 	mut jrs := DetailResult{}
 	start := time.ticks()
 	data := http.get_text(url)

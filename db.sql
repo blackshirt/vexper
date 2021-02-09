@@ -157,11 +157,14 @@ CREATE TABLE IF NOT EXISTS `RekapAnggaranSatker`(
 
 CREATE VIEW IF NOT EXISTS `v_rups` AS
 SELECT
-    Rup.id AS id,
     Rup.kode_rup AS kode_rup,
     Rup.nama_paket AS nama_paket,
     Rup.sumber_dana AS sumber_dana,
     Rup.pagu AS pagu,
+    RekapKegiatanSatker.nama_satker AS nama_satker,
+    RekapKegiatanSatker.kode_satker AS kode_satker,
+    Rup.jenis AS jenis,
+    Rup.metode AS metode,
     Rup.awal_pemilihan AS awal_pemilihan,
     Rup.akhir_pemilihan AS akhir_pemilihan,
     Rup.awal_pelaksanaan AS awal_pelaksanaan,
@@ -169,22 +172,20 @@ SELECT
     Rup.tipe AS tipe,
     Rup.kegiatan AS kegiatan,
     Rup.usaha_kecil AS usaha_kecil,
-    RekapKegiatanSatker.nama_satker AS nama_satker,
-    RekapKegiatanSatker.kode_satker AS kode_satker,
-    metode.nama AS metode,
-    jenis.nama AS jenis,
     Rup.year AS tahun,
-    Rup.last_updated AS last_updated,
+    Rup.last_updated AS last_updated
 FROM
     `Rup`
-    INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode_satker = Rup.kode_satker
-    INNER JOIN jenis ON jenis.jid = Rup.jenis
-    INNER JOIN metode ON metode.mid = Rup.metode;
+    INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode_satker = Rup.kode_satker;
 
+/*
+ INNER JOIN metode on metode.mid = Rup.metode
+ INNER JOIN jenis ON jenis.jid = Rup.jenis;
+ */
 CREATE VIEW IF NOT EXISTS `v_all_satker` AS
 SELECT
-    RekapKegiatanSatker.kode_satker AS kode_satker,
-    RekapKegiatanSatker.nama_satker AS nama_satker
+    kode_satker,
+    nama_satker
 FROM
     `RekapKegiatanSatker`;
 

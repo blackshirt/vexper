@@ -80,8 +80,8 @@ fn main() {
 	//	println(rup)
 	//}
 	//println(rups)
-	res := siroup.all_rup('2021') ?
-	rups := siroup.parse_all_rup(res) ?
+	res := siroup.all_rup('2021') or {panic(err)}
+	rups := siroup.parse_all_rup(res) or {panic(err)}
 	c.save_rup(rups)
 	//res := c.daftar_satker()
 	//println(res)
