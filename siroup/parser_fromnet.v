@@ -1,4 +1,4 @@
-module url
+module siroup
 
 import json
 import time
@@ -156,14 +156,17 @@ fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 		// rup.kode_satker = ''
 		rup.nama_paket = item[2]
 		rup.pagu = item[3]
-		rup.metode = item[4]
+		// metode dalam bentuk MetodePengadaan
+		rup.metode = metode_from_str(item[4])
 		rup.sumber_dana = item[5]
 		// rup.kode_rup = item[6]
 		rup.awal_pemilihan = item[7]
 		rup.kegiatan = item[2] // sama paket ??
 		rup.last_updated = time.now().str()
+		//rup.jenis belum ada
 		rup.year = tahun
 		rup.tipe = 'Penyedia'
+		rup.tipe_swakelola = 'non swakelola'
 		rv << rup
 	}
 	return rv
@@ -183,7 +186,7 @@ fn parse_swa_allsatker(src string, tahun string) ?[]Rup {
 		rup.nama_satker = item[1]
 		rup.nama_paket = item[2]
 		rup.pagu = item[3]
-		rup.metode = 'Swakelola'
+		rup.metode = metode_from_str('Swakelola') // bentuk enum MetodePengadaan
 		rup.sumber_dana = item[4]
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
@@ -191,6 +194,7 @@ fn parse_swa_allsatker(src string, tahun string) ?[]Rup {
 		rup.last_updated = time.now().str()
 		rup.year = tahun
 		rup.tipe = 'Swakelola'
+		rup.jenis = jenis_pengadaan_from_str('Swakelola')
 		rv << rup
 	}
 	return rv
@@ -213,7 +217,7 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 		rup.kegiatan = item[2]
 		rup.pagu = item[3]
 		rup.awal_pemilihan = item[4]
-		rup.metode = item[5]
+		rup.metode = metode_from_str(item[5]) // enum form
 		rup.sumber_dana = item[6]
 		// item[7] unknown
 		// item[8] unknown
@@ -222,6 +226,7 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 		rup.last_updated = time.now().str()
 		rup.year = tahun
 		rup.tipe = 'Penyedia dalam Swakelola'
+		rup.tipe_swakelola = 'non swakelola'
 		rv << rup
 	}
 	return rv
@@ -241,7 +246,7 @@ fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.nama_paket = item[1]
 		rup.kegiatan = item[1] // sama nama paket ?
 		rup.pagu = item[2]
-		rup.metode = item[3]
+		rup.metode = metode_from_str(item[3])
 		rup.sumber_dana = item[4]
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
@@ -249,6 +254,7 @@ fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.last_updated = time.now().str()
 		rup.year = tahun
 		rup.tipe = 'Penyedia'
+		rup.tipe_swakelola = 'non swakelola'
 		rv << rup
 	}
 	return rv
@@ -271,13 +277,14 @@ fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.kode_satker = id_satker
 		rup.pagu = item[3]
 		// rup.metode not avaliable in swa, diisi Swakelola ?
-		rup.metode = 'Swakelola'
+		rup.metode = metode_from_str('Swakelola')
 		rup.sumber_dana = item[4]
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
 		rup.last_updated = time.now().str()
 		rup.year = tahun
 		rup.tipe = 'Swakelola'
+		rup.jenis = jenis_pengadaan_from_str('Swakelola')
 		rv << rup
 	}
 	return rv
@@ -297,7 +304,7 @@ fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.nama_paket = item[1]
 		rup.kegiatan = item[1] //??
 		rup.pagu = item[2]
-		rup.metode = item[3]
+		rup.metode = metode_from_str(item[3])
 		rup.sumber_dana = item[4]
 		// item[5] kode rup
 		rup.awal_pemilihan = item[6]
@@ -308,6 +315,8 @@ fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.last_updated = time.now().str()
 		rup.year = tahun
 		rup.tipe = 'Penyedia dalam Swakelola'
+		//rup.jenis = 
+		rup.tipe_swakelola = 'non swakelola'
 		rv << rup
 	}
 	return rv

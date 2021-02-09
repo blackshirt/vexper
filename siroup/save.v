@@ -1,4 +1,4 @@
-module url
+module siroup
 
 pub fn (c CPool) save_rup(rups []Rup) {
 	if rups.len == 0 {

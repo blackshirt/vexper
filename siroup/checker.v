@@ -1,4 +1,4 @@
-module url
+module siroup
 
 struct RupDiff {
 	mut:
@@ -113,13 +113,13 @@ pub fn (c CPool) compare(rups []Rup) ?SatkerDiff {
 		// 7 nama satker skip
 		// 8 kode_satker skip
 		// 9 metode
-		if row.vals[9] != ex.metode {
+		if row.vals[9] != ex.metode.str() {
 			old_val := row.vals[9]
 			new_val := ex.metode
 			mut vals := []string{}
 			vals << 'metode'
 			vals << old_val
-			vals << new_val
+			vals << new_val.str() // enum form
 			diffarray << vals
 		}
 		// jenis

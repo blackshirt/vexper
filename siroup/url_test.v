@@ -1,4 +1,4 @@
-module url
+module siroup
 
 fn test_persatker_url_bytipe() {
 	res1 := persatker_url_bytipe(.pyd, '63401', '2022') or { return }

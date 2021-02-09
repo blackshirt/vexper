@@ -1,4 +1,4 @@
-module url
+module siroup
 
 import net.urllib
 

@@ -1,4 +1,4 @@
-module url
+module siroup
 
 import time
 import net.html
@@ -159,13 +159,13 @@ pub fn detail_rup_url(tpk TipeKeg, kode_rup string) ?string {
 	mut val := urllib.new_values()
 	match tpk {
 		.pyd, .pds {
-			path := url.pyd_path + '/' + kode_rup
+			path := pyd_path + '/' + kode_rup
 			url := urllib.parse(path) ?
 			return url.str()
 		}
 		.swa {
 			val.add('idPaket', kode_rup)
-			mut url := urllib.parse(url.swa_path) ?
+			mut url := urllib.parse(swa_path) ?
 			url.raw_query = val.encode()
 			return url.str()
 		}

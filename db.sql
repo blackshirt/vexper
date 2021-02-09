@@ -11,10 +11,19 @@ INSERT
 VALUES
     (0, "Unknown", "Unknonw jenis"),
     (1, "Barang", "Pengadaan barang"),
-    (2, "Konstruksi", "Pengadaan jasa konstruksi"),
-    (3, "Konsultansi", "Pengadaan jasa konsultansi"),
+    (
+        2,
+        "Pekerjaan Konstruksi",
+        "Pengadaan jasa konstruksi"
+    ),
+    (
+        3,
+        "Jasa Konsultansi",
+        "Pengadaan jasa konsultansi"
+    ),
     (4, "Jasa Lainnya", "Pengadaan jasa lainnya"),
-    (5, "Sayembara", "Pengadaan sayembara") ON CONFLICT DO NOTHING;
+    (5, "Sayembara", "Pengadaan sayembara"),
+    (6, "Swakelola", "Jenis swakelola") ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS `metode` (
     `mid` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,19 +73,26 @@ CREATE TABLE IF NOT EXISTS `Rup` (
     `kode_rup` TEXT NOT NULL UNIQUE,
     `nama_paket` VARCHAR(256) NOT NULL,
     `pagu` VARCHAR(128) NOT NULL,
-    `awal_pemilihan` VARCHAR(128) NOT NULL,
-    `metode` VARCHAR(128) NOT NULL,
-    `sumber_dana` VARCHAR(128) NOT NULL,
     `kegiatan` TEXT,
+    `sumber_dana` VARCHAR(128) NOT NULL,
     `kode_satker` TEXT NOT NULL,
-    `tipe` TEXT NOT NULL,
-    `mtd` INT NOT NULL DEFAULT 0,
+    `awal_pemilihan` VARCHAR(128) NOT NULL,
+    `akhir_pemilihan` TEXT NOT NULL DEFAULT 'Unknown',
+    `awal_pelaksanaan` TEXT NOT NULL DEFAULT 'Unknown',
+    `akhir_pelaksanaan` TEXT NOT NULL DEFAULT 'Unknown',
+    `awal_pemanfaatan` TEXT NOT NULL DEFAULT 'Unknown',
+    `akhir_pemanfaatan` TEXT NOT NULL DEFAULT 'Unknown',
+    `usaha_kecil` TEXT CHECK (`usaha_kecil` IN ('Unknown', 'Ya', 'Tidak')) NOT NULL DEFAULT 'Unknown',
+    `tgl_perbaharui_paket` TEXT NOT NULL DEFAULT 'Unknown',
+    `tipe_swakelola` TEXT NOT NULL DEFAULT 'Unknown',
+    `tipe` TEXT NOT NULL NOT NULL DEFAULT 'Unknown',
+    `metode` INT NOT NULL DEFAULT 0,
     `jenis` INT NOT NULL DEFAULT 0,
     `year` TEXT NOT NULL DEFAULT (strftime('%Y', 'now')),
     `inserted_at` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `last_updated` TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(`kode_satker`) REFERENCES `RekapKegiatanSatker`(`kode_satker`),
-    FOREIGN KEY(`mtd`) REFERENCES `metode`(`mid`),
+    FOREIGN KEY(`metode`) REFERENCES `metode`(`mid`),
     FOREIGN KEY(`jenis`) REFERENCES `jenis`(`jid`)
 );
 
@@ -147,18 +163,23 @@ SELECT
     Rup.sumber_dana AS sumber_dana,
     Rup.pagu AS pagu,
     Rup.awal_pemilihan AS awal_pemilihan,
+    Rup.akhir_pemilihan AS akhir_pemilihan,
+    Rup.awal_pelaksanaan AS awal_pelaksanaan,
+    Rup.akhir_pelaksanaan AS akhir_pelaksanaan,
     Rup.tipe AS tipe,
     Rup.kegiatan AS kegiatan,
+    Rup.usaha_kecil AS usaha_kecil,
     RekapKegiatanSatker.nama_satker AS nama_satker,
     RekapKegiatanSatker.kode_satker AS kode_satker,
-    Rup.metode AS metode,
+    metode.nama AS metode,
     jenis.nama AS jenis,
     Rup.year AS tahun,
-    Rup.last_updated AS last_updated
+    Rup.last_updated AS last_updated,
 FROM
     `Rup`
     INNER JOIN RekapKegiatanSatker ON RekapKegiatanSatker.kode_satker = Rup.kode_satker
-    INNER JOIN jenis ON jenis.jid = Rup.jenis;
+    INNER JOIN jenis ON jenis.jid = Rup.jenis
+    INNER JOIN metode ON metode.mid = Rup.metode;
 
 CREATE VIEW IF NOT EXISTS `v_all_satker` AS
 SELECT
@@ -172,7 +193,8 @@ select
     tipe,
     metode,
     count(*) as total_paket,
-    sum(count(*)) over() as total_seluruh_paket round(100.0 * count(*) / sum(count(*)) over(), 2) as percent_paket
+    sum(count(*)) over() as total_seluruh_paket,
+    round(100.0 * count(*) / sum(count(*)) over(), 2) as percent_paket
 from
     v_rups
 group by

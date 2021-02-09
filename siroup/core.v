@@ -1,22 +1,6 @@
-// url module intended to be used as core library
-module url
+// siroup module intended to be used as core library
+module siroup
 
-/*
-const (
-	// kegiatan
-	rup_rekap_sekbm             = 'https://sirup.lkpp.go.id/sirup/ro/dt/klpd/2?tahun=2021&jenisID=KABUPATEN&sSearch=Pemerintah+Daerah+Kabupaten+Kebumen'
-	rup_penyedia_sekbm          = 'https://sirup.lkpp.go.id/sirup/datatablectr/dataruppenyediakldi?idKldi=D128&tahun=2021'
-	rup_swakelola_sekbm         = 'https://sirup.lkpp.go.id/sirup/datatablectr/datarupswakelolakldi?idKldi=D128&tahun=2021'
-	rup_penyedia_swa_sekbm      = 'https://sirup.lkpp.go.id/sirup/datatablectr/dataruppenyediaswakelolaallrekapkldi?idKldi=D128&tahun=2021'
-	rup_kegiatan_satker         = 'https://sirup.lkpp.go.id/sirup/datatablectr/datatableruprekapkldi?idKldi=D128&tahun=2021'
-	rup_penyedia_per_satker     = 'https://sirup.lkpp.go.id/sirup/datatablectr/dataruppenyediasatker?tahun=2021&idSatker=63401'
-	rup_swakelola_per_satker    = 'https://sirup.lkpp.go.id/sirup/datatablectr/datarupswakelolasatker?tahun=2021&idSatker=63451'
-	rup_penyedia_swa_per_satker = 'https://sirup.lkpp.go.id/sirup/datatablectr/dataruppenyediaswakelolaallrekap?tahun=2021&idSatker=104593'
-	// anggaran
-	rup_anggaran_kbm            = 'https://sirup.lkpp.go.id/sirup/datatablectr/datatableruprekapkldianggaran?tahun=2021&jenisKLPD=KABUPATEN&sSearch=Pemerintah+Daerah+Kabupaten+Kebumen'
-	rup_anggaran_perkldi        = 'https://sirup.lkpp.go.id/sirup/datatablectr/datatableruprekapkldianggaranpersatker?idKldi=D128&tahun=2021'
-)
-*/
 const (
 	baseurl              = 'https://sirup.lkpp.go.id/' // rup base url
 	basepath             = 'sirup/datatablectr/' // rup base path
@@ -55,33 +39,42 @@ struct RawResponse {
 	secho         int        [json: 'sEcho']
 }
 
-// generic rup item
-struct Rup {
-mut:
-	kode_rup       string
-	kode_satker    string
-	nama_satker    string
-	nama_paket     string
-	pagu           string
-	metode         string
-	sumber_dana    string
-	awal_pemilihan string
-	kegiatan       string
-	last_updated   string
-	year           string
-	tipe           string
-	jenis          JenPeng
+enum MetodePengadaan {
+	tender
+	swakelola
+	epurchasing
+	tendercepat
+	dikecualikan
+	pengadaanlangsung
+	penunjukanlangsung
 }
 
-// rup swa
-// "aaData":[["24944760","RSUD PREMBUN","Belanja Alat/bahan untuk Kegiatan Kantor-Bahan Cetak","3035000","APBD","24944760","January 2021",
-// "Penyediaan Layanan Kesehatan untuk UKM dan UKP Rujukan Tingkat Daerah Kabupaten/Kota"]
-// struct RupSwa {
-//	Rup
-// mut:
-//	kegiatan string
-//}
-enum JenPeng {
+pub fn (mp MetodePengadaan) str() string {
+	return match mp {
+		.tender { 'Tender' }
+		.swakelola { 'Swakelola' }
+		.epurchasing { 'e-Purchasing' }
+		.tendercepat { 'Tender Cepat' }
+		.dikecualikan { 'Dikecualikan' }
+		.pengadaanlangsung { 'Pengadaan Langsung' }
+		.penunjukanlangsung { 'Penunjukan Langsung' }
+	}
+}
+
+pub fn metode_from_str(m string) MetodePengadaan {
+	return match m {
+		'Tender' { MetodePengadaan.tender }
+		'Swakelola' { MetodePengadaan.swakelola }
+		'e-Purchasing' { MetodePengadaan.epurchasing }
+		'Tender Cepat' { MetodePengadaan.tendercepat }
+		'Dikecualikan' { MetodePengadaan.dikecualikan }
+		'Pengadaan Langsung' { MetodePengadaan.pengadaanlangsung }
+		'Penunjukan Langsung' { MetodePengadaan.penunjukanlangsung }
+		else { MetodePengadaan.pengadaanlangsung }
+	}
+}
+
+enum JenisPengadaan {
 	unknown
 	barang
 	konstruksi
@@ -91,7 +84,7 @@ enum JenPeng {
 	swakelola
 }
 
-fn (j JenPeng) str() string {
+fn (j JenisPengadaan) str() string {
 	return match j {
 		.unknown { 'Unknown' }
 		.barang { 'Barang' }
@@ -103,19 +96,43 @@ fn (j JenPeng) str() string {
 	}
 }
 
-fn jenis_pengadaan_from_str(jp string) JenPeng {
+fn jenis_pengadaan_from_str(jp string) JenisPengadaan {
 	return match jp {
-		'Barang' { JenPeng.barang }
-		'Pekerjaan Konstruksi' { JenPeng.konstruksi }
-		'Jasa Konsultansi' { JenPeng.konsultansi }
-		'Jasa Lainnya' { JenPeng.jasalainnya }
-		'Sayembara' { JenPeng.sayembara }
-		'Swakelola' {JenPeng.swakelola}
-		else { JenPeng.unknown }
+		'Barang' { JenisPengadaan.barang }
+		'Pekerjaan Konstruksi' { JenisPengadaan.konstruksi }
+		'Jasa Konsultansi' { JenisPengadaan.konsultansi }
+		'Jasa Lainnya' { JenisPengadaan.jasalainnya }
+		'Sayembara' { JenisPengadaan.sayembara }
+		'Swakelola' { JenisPengadaan.swakelola }
+		else { JenisPengadaan.unknown }
 	}
 }
 
-
+// generic rup item
+struct Rup {
+mut:
+	kode_rup             string
+	kode_satker          string
+	nama_satker          string
+	nama_paket           string
+	pagu                 string
+	sumber_dana          string
+	awal_pemilihan       string
+	akhir_pemilihan      string
+	awal_pelaksanaan     string
+	akhir_pelaksanaan    string
+	awal_pemanfaatan     string
+	akhir_pemanfaatan    string
+	kegiatan             string
+	year                 string
+	tipe                 string
+	usaha_kecil          string
+	tgl_perbaharui_paket string
+	tipe_swakelola       string // untuk swakelola
+	jenis                JenisPengadaan
+	metode               MetodePengadaan
+	last_updated         string
+}
 
 // ["D128","Pemerintah Daerah Kabupaten Kebumen",
 // "130579571100","76459681099","2316174000","209355426199"]
@@ -180,39 +197,4 @@ mut:
 	tot_pagu_pds string
 	last_updated string
 	year         string
-}
-
-enum MePeng {
-	tender
-	swakelola
-	epurchasing
-	tendercepat
-	dikecualikan
-	pengadaanlangsung
-	penunjukanlangsung
-}
-
-pub fn (mp MePeng) str() string {
-	return match mp {
-		.tender { 'Tender' }
-		.swakelola { 'Swakelola' }
-		.epurchasing { 'e-Purchasing' }
-		.tendercepat { 'Tender Cepat' }
-		.dikecualikan { 'Dikecualikan' }
-		.pengadaanlangsung { 'Pengadaan Langsung' }
-		.penunjukanlangsung { 'Penunjukan Langsung' }
-	}
-}
-
-pub fn method_from_str(m string) MePeng {
-	return match m {
-		'Tender' { MePeng.tender }
-		'Swakelola' { MePeng.swakelola }
-		'e-Purchasing' { MePeng.epurchasing }
-		'Tender Cepat' { MePeng.tendercepat }
-		'Dikecualikan' { MePeng.dikecualikan }
-		'Pengadaan Langsung' { MePeng.pengadaanlangsung }
-		'Penunjukan Langsung' { MePeng.penunjukanlangsung }
-		else { MePeng.pengadaanlangsung }
-	}
 }
