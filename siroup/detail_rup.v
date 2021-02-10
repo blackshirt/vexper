@@ -19,6 +19,19 @@ mut:
 	kode_rup string
 	url      string
 	body     string
+	err_msg  string
+}
+
+fn (dr DetailResult) result_in_oops() bool {
+	mut doc := html.parse(dr.body)
+	tags := doc.get_tag('h1') //<h1 class="header">Oops, sabar ya !</h1>
+	for tag in tags {
+		if 'class' in tag.attributes && tag.attributes['class'] == 'header' && tag.text() == 'Oops, sabar ya !' {
+			// error happen
+			return true
+		}
+	}
+	return false
 }
 
 struct DetailPropertiRup {
@@ -52,16 +65,16 @@ pub fn (c CPool) update_detail(dpr []DetailPropertiRup) {
 	c.exec("COMMIT")
 }
 
-pub fn decode_detail(drs []DetailResult) []DetailPropertiRup {
+pub fn decode_detail(drs []DetailResult, rch chan DetailPropertiRup) []DetailPropertiRup {
 	mut dpr := []DetailPropertiRup{}
 	for item in drs {
-		dp := item.decode()
-		dpr << dp
+		go item.decode(rch)
+		dpr << <- rch
 	}
 	return dpr
 }
 
-fn (dr DetailResult) decode() DetailPropertiRup {
+fn (dr DetailResult) decode(rch chan DetailPropertiRup) {
 	mut spr := DetailPropertiRup{}
 	if dr.tipe in [.pyd, .pds] {
 		waktu_tags := tags_waktu_penyedia(dr)
@@ -85,6 +98,7 @@ fn (dr DetailResult) decode() DetailPropertiRup {
 		spr.tipe_swakelola = 'non swakelola'
 	}
 	if dr.tipe == .swa {
+		spr.jenis_pengadaan = 'Swakelola'
 		swa_tags := tags_waktu_swakelola(dr)
 		if swa_tags.len != 0 {
 			spr.tipe_swakelola = swa_tags[0].text().trim_left(': ')
@@ -99,7 +113,7 @@ fn (dr DetailResult) decode() DetailPropertiRup {
 	}
 
 	spr.kode_rup = dr.kode_rup
-	return spr
+	rch <- spr
 }
 
 fn tags_pembaharuan(dr DetailResult) []&html.Tag {
@@ -180,7 +194,9 @@ fn tags_waktu_swakelola(dr DetailResult) []&html.Tag {
 	return res
 }
 
-pub fn detail_rup_url(tpk TipeKeg, kode_rup string) ?string {
+// `detail_rup_url` for building url spesific to tipe kegiatan in `tpk` 
+// and `kode_rup` params
+fn detail_rup_url(tpk TipeKeg, kode_rup string) ?string {
 	mut val := urllib.new_values()
 	match tpk {
 		.pyd, .pds {
@@ -227,7 +243,7 @@ fn do_fetch(rup Rup) ?DetailResult {
 }
 
 // note: operasi ini intensif karena fetch http
-fn do_fetch_concurrent(rup Rup, reschan chan DetailResult) ?{
+fn do_fetch_concurrent(rup Rup, rsc chan DetailResult) ?{
 	// TODO: check tpk dan kode_rup harus matching karena jika kode rup dimaksud untuk swakelola
 	// tetapi tipe diambil penyedia, maka result bisa untuk kabupaten lain.
 	// check ini https://sirup.lkpp.go.id/sirup/home/detailPaketSwakelolaPublic2017?idPaket=24925776 (Kab Kebumen)
@@ -242,7 +258,7 @@ fn do_fetch_concurrent(rup Rup, reschan chan DetailResult) ?{
 	dr.tipe = tipekeg_from_str(rup.tipe)
 	dr.url = url
 	dr.body = body
-	reschan <- dr
+	rsc <- dr
 }
 
 fn (c CPool) fetch_detail(rup Rup) ?DetailResult {
@@ -253,10 +269,11 @@ fn (c CPool) fetch_detail(rup Rup) ?DetailResult {
 	return error("rup with kode ${rup.kode_rup} doesn't exist in db")
 }
 
-fn (c CPool) fetch_detail_concurrently(rup Rup, reschan chan DetailResult) ?{
+// fetch detail rup 
+fn (c CPool) fetch_detail_concurrently(rup Rup, rsc chan DetailResult) ?{
 	if c.rup_withkode_exist(rup.kode_rup) {
 		dr := do_fetch(rup) ?
-		reschan <- dr
+		rsc <- dr
 	}
 	return error("error in fetch concurent")
 }
@@ -272,35 +289,12 @@ pub fn (c CPool) fetch_detail_from_satker(kode_satker string) ?[]DetailResult {
 	return drs
 }
 
-pub fn (c CPool) fetch_detail_from_satker_conccurently(kode_satker string, reschan chan DetailResult) ?[]DetailResult {
+pub fn (c CPool) fetch_detail_from_satker_conccurently(kode_satker string, rsc chan DetailResult) ?[]DetailResult {
 	rups := c.rup_from_satker(kode_satker)
 	mut drs := []DetailResult{}
 	for rup in rups {
-		go c.fetch_detail_concurrently(rup, reschan) ?
-		drs << <- reschan
+		go c.fetch_detail_concurrently(rup, rsc) ?
+		drs << <- rsc
 	}
 	return drs
-}
-
-
-
-fn send_request(url string, jrschan chan DetailResult) {
-	mut jrs := DetailResult{}
-	start := time.ticks()
-	data := http.get_text(url)
-	finish := time.ticks()
-	println('Finish fetch $url in ... ${finish - start} ms')
-	jrs.url = url
-	jrs.body = data
-	jrschan <- jrs
-}
-
-pub fn jenpeng_array_rup(rups []Rup, jrschan chan DetailResult) ?[]DetailResult {
-	mut mjp := []DetailResult{}
-	urls := build_jenis_url_for_rups(rups) ?
-	for item in urls {
-		go send_request(item, jrschan)
-		mjp << <-jrschan
-	}
-	return mjp
 }

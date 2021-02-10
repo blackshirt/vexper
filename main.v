@@ -86,13 +86,17 @@ fn main() {
 	//res := c.daftar_satker()
 	//println(res)
 	//rups_satker := c.rup_from_satker('63408')
+	
 	rchan := chan siroup.DetailResult{}
+	rch := chan siroup.DetailPropertiRup{}
 	drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
 	//println(drs)
-	dpr := siroup.decode_detail(drs)
+	dpr := siroup.decode_detail(drs, rch)
 	//println(dpr)
 	c.update_detail(dpr)
 	rchan.close()
+	rch.close()
+	
 }
 
 /*
