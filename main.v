@@ -27,7 +27,7 @@ fn main() {
 	//mut result := siroup.DetailResult{}
 	//result = <- jnres
 	//println(dr)
-	//sisa := res.decode_detail()
+	//sisa := res.decode()
 	//println(sisa)
 	//jnres.close()
 	
@@ -80,12 +80,19 @@ fn main() {
 	//	println(rup)
 	//}
 	//println(rups)
-	res := siroup.all_rup('2021') or {panic(err)}
-	rups := siroup.parse_all_rup(res) or {panic(err)}
-	c.save_rup(rups)
+	//res := siroup.all_rup('2021') or {panic(err)}
+	//rups := siroup.parse_all_rup(res) or {panic(err)}
+	//c.save_rup(rups)
 	//res := c.daftar_satker()
 	//println(res)
-	
+	//rups_satker := c.rup_from_satker('63408')
+	rchan := chan siroup.DetailResult{}
+	drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
+	//println(drs)
+	dpr := siroup.decode_detail(drs)
+	//println(dpr)
+	c.update_detail(dpr)
+	rchan.close()
 }
 
 /*

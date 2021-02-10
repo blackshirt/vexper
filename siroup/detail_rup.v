@@ -36,7 +36,32 @@ mut:
 	tipe_swakelola            string = '1' // untuk yang swakelola, default tipe 1
 }
 
-pub fn (dr DetailResult) decode_detail() DetailPropertiRup {
+pub fn (c CPool) update_detail(dpr []DetailPropertiRup) {
+	c.exec("BEGIN TRANSACTION")
+	for item in dpr {
+		jenis := jenis_pengadaan_from_str(item.jenis_pengadaan)
+		q := "update Rup set jenis='${jenis}', usaha_kecil='${item.usaha_kecil}', \
+		akhir_pemilihan='${item.akhir_pemilihan}', awal_pelaksanaan='${item.awal_pelaksanaan_kontrak}', \
+		akhir_pelaksanaan='${item.akhir_pelaksanaan_kontrak}', awal_pemanfaatan='${item.awal_pemanfaatan}',\
+		akhir_pemanfaatan='${item.akhir_pemanfaatan}', tgl_perbaharui_paket='${item.tgl_perbaharui_paket}', \
+		tipe_swakelola='${item.tipe_swakelola}' where kode_rup='${item.kode_rup}'"
+		println("Begin update ...'${item.kode_rup}'")
+		_, code := c.exec(q)
+		println("Finish update '${item.kode_rup}'...'$code'")
+	}
+	c.exec("COMMIT")
+}
+
+pub fn decode_detail(drs []DetailResult) []DetailPropertiRup {
+	mut dpr := []DetailPropertiRup{}
+	for item in drs {
+		dp := item.decode()
+		dpr << dp
+	}
+	return dpr
+}
+
+fn (dr DetailResult) decode() DetailPropertiRup {
 	mut spr := DetailPropertiRup{}
 	if dr.tipe in [.pyd, .pds] {
 		waktu_tags := tags_waktu_penyedia(dr)
@@ -182,14 +207,18 @@ fn build_jenis_url_for_rups(rups []Rup) ?[]string {
 	return res
 }
 
-pub fn fetch_detail(rup Rup) ?DetailResult {
+// note: operasi ini intensif karena fetch http
+fn do_fetch(rup Rup) ?DetailResult {
 	// TODO: check tpk dan kode_rup harus matching karena jika kode rup dimaksud untuk swakelola
 	// tetapi tipe diambil penyedia, maka result bisa untuk kabupaten lain.
 	// check ini https://sirup.lkpp.go.id/sirup/home/detailPaketSwakelolaPublic2017?idPaket=24925776 (Kab Kebumen)
 	// dan https://sirup.lkpp.go.id/sirup/home/detailPaketPenyediaPublic2017/24925776 >> Kab Banjar (Kalsel) ?
 	mut dr := DetailResult{}
 	url := detail_rup_url(tipekeg_from_str(rup.tipe), rup.kode_rup) ?
+	start := time.ticks()
 	body := http.get_text(url)
+	finish := time.ticks()
+	println('Finish fetch $url in ... ${finish - start} ms')
 	dr.kode_rup = rup.kode_rup
 	dr.tipe = tipekeg_from_str(rup.tipe)
 	dr.url = url
@@ -197,15 +226,63 @@ pub fn fetch_detail(rup Rup) ?DetailResult {
 	return dr
 }
 
-fn (c CPool) fetch_detail_from_satker(kode_satker string) ?[]DetailResult {
-	rups := c.rup_from_satker(kode_satker)?
+// note: operasi ini intensif karena fetch http
+fn do_fetch_concurrent(rup Rup, reschan chan DetailResult) ?{
+	// TODO: check tpk dan kode_rup harus matching karena jika kode rup dimaksud untuk swakelola
+	// tetapi tipe diambil penyedia, maka result bisa untuk kabupaten lain.
+	// check ini https://sirup.lkpp.go.id/sirup/home/detailPaketSwakelolaPublic2017?idPaket=24925776 (Kab Kebumen)
+	// dan https://sirup.lkpp.go.id/sirup/home/detailPaketPenyediaPublic2017/24925776 >> Kab Banjar (Kalsel) ?
+	mut dr := DetailResult{}
+	url := detail_rup_url(tipekeg_from_str(rup.tipe), rup.kode_rup) ?
+	start := time.ticks()
+	body := http.get_text(url)
+	finish := time.ticks()
+	println('Finish fetch $url in ... ${finish - start} ms')
+	dr.kode_rup = rup.kode_rup
+	dr.tipe = tipekeg_from_str(rup.tipe)
+	dr.url = url
+	dr.body = body
+	reschan <- dr
+}
+
+fn (c CPool) fetch_detail(rup Rup) ?DetailResult {
+	if c.rup_withkode_exist(rup.kode_rup) {
+		dr := do_fetch(rup) ?
+		return dr
+	}
+	return error("rup with kode ${rup.kode_rup} doesn't exist in db")
+}
+
+fn (c CPool) fetch_detail_concurrently(rup Rup, reschan chan DetailResult) ?{
+	if c.rup_withkode_exist(rup.kode_rup) {
+		dr := do_fetch(rup) ?
+		reschan <- dr
+	}
+	return error("error in fetch concurent")
+}
+// note: intensive operation, rups may be contains thousands of item
+// should be placed in concurrency manner
+pub fn (c CPool) fetch_detail_from_satker(kode_satker string) ?[]DetailResult {
+	rups := c.rup_from_satker(kode_satker)
 	mut drs := []DetailResult{}
 	for rup in rups {
-		dr := fetch_detail(rup)?
+		dr := c.fetch_detail(rup)?
 		drs << dr
 	}
 	return drs
 }
+
+pub fn (c CPool) fetch_detail_from_satker_conccurently(kode_satker string, reschan chan DetailResult) ?[]DetailResult {
+	rups := c.rup_from_satker(kode_satker)
+	mut drs := []DetailResult{}
+	for rup in rups {
+		go c.fetch_detail_concurrently(rup, reschan) ?
+		drs << <- reschan
+	}
+	return drs
+}
+
+
 
 fn send_request(url string, jrschan chan DetailResult) {
 	mut jrs := DetailResult{}
