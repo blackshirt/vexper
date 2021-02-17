@@ -19,25 +19,39 @@ fn new_app() Command {
 		global: true
 	})
 
-	mut update_op := Command{
-		name: 'update'
-		description: 'update operation'
-		usage: '<object>'
-		execute: update_cb
+	mut rup_cmd := Command{
+		name: 'rup'
+		description: 'rup operation'
+		usage: '<command>'
+		execute: rup_cb
+		required_args: 1
 	}
-	update_op.add_flag(Flag{
-		flag: .string
-		name: 'tipe'
-		abbrev: 't'
-		description: 'tipe to update'
-	})
 
-	mut stats_op := Command{
-		name: 'stats'
-		description: 'statistic of the database'
-		execute: stats_cb
+	mut rekap_cmd := Command{
+		name: 'rekap'
+		description: 'get rekap'
+		usage: '<tipe_rekap>'
+		execute: rekap_cb
 	}
-	root_cmd.add_commands([update_op, stats_op])
+
+	mut rup_update_cmd := Command{
+		name: 'update'
+		description: 'perform update on rup database'
+		execute: rup_update_cb
+	}
+
+	mut rup_diff_cmd := Command{
+		name: 'diff'
+		description: 'show different parts between rup database in db and from net'
+		execute: rup_diff_cb
+	}
+	mut rup_stats_cmd := Command{
+		name: 'stats'
+		description: 'statistics of rup database'
+		execute: rup_stats_cb
+	}
+	rup_cmd.add_commands([rup_update_cmd, rup_stats_cmd, rup_diff_cmd])
+	root_cmd.add_commands([rup_cmd, rekap_cmd])
 	return root_cmd
 }
 
@@ -53,24 +67,36 @@ fn inject_db_flag(mut cmd Command) {
 		db := cmd.flags.get_string('db') or { return }
 		if db == '' {
 			if cmd.flags[0].name == 'db' {
-				cmd.flags[0].value << default_db
+				cmd.flags[0].value = default_db
 			}
 		}
 	}
 }
 
-fn update_cb(cmd Command) ? {
+fn rup_cb(cmd Command) ? {
 	println(cmd.args)
 	db := cmd.flags.get_string('db') or { return }
 	println(db)
-	t := cmd.flags.get_string('tipe') or {return}
+	t := cmd.flags.get_string('tipe') or { return }
 	println(t)
 	if t == '' {
 		cmd.execute_help()
 	}
 }
 
-fn stats_cb(cmd Command) ? {
+fn rekap_cb(cmd Command) ? {
+	println('Rekap operation ...')
+}
+
+fn rup_stats_cb(cmd Command) ? {
 	db := cmd.flags.get_string('db') or { return }
 	println(db)
+}
+
+fn rup_update_cb(cmd Command) ? {
+	println('Rup update ....')
+}
+
+fn rup_diff_cb(cmd Command) ? {
+	println('Rup diff .....')
 }
