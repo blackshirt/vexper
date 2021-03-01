@@ -16,13 +16,13 @@ fn (c CPool) update_single_rup(rup Rup) ?int {
 	return error("Rup ${rup.kode_rup} does not exist")
 }
 
-fn (c CPool) update_rup(rups []Rup) {
+fn (c CPool) update_rup(rups []Rup) ? {
 	if rups.len == 0 {
 		return
 	}
 	c.exec('BEGIN TRANSACTION')
 	for rup in rups {
-		c.update_rup(rup)?
+		c.update_single_rup(rup)?
 	}
 	c.exec('COMMIT')
 }
@@ -49,7 +49,7 @@ fn (c CPool) save_single_rup(rup Rup) ?int {
 }
 
 
-fn (c CPool) save_rup(rups []Rup) {
+fn (c CPool) save_rup(rups []Rup) ? {
 	if rups.len == 0 {
 		return
 	}

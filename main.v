@@ -66,16 +66,17 @@ fn main() {
 	*/
 	
 	//println(stk)
-	//res := siroup.all_rup_from_satker('63408', '2021') or {panic(err)}
-	//println("Fetch ....$res")
-	//rups := siroup.parse_all_rup_from_satker(res) or {panic(err)}
+	res := siroup.penyedia_from_satker('63408', '2021') or {panic(err)}
+	println("Fetch ....$res")
+	rups := siroup.parse_pyd_persatker(res, '63408', '2021') or {panic(err)}
+	println(rups)
 	//c.save_rup(rups)
 	//println("Rups....$rups")
 	//println("from db")
 	//dbrup := c.rup_from_satker('99566')
 	//println("rup from db....$dbrup")
-	//diff := c.compare(rups) or {panic(err)}
-	//println(diff)
+	diff := c.compare_array_rup(rups) or { panic(err)}
+	println(diff)
 	//for rup in rups {
 	//	println(rup)
 	//}
@@ -87,15 +88,15 @@ fn main() {
 	//println(res)
 	//rups_satker := c.rup_from_satker('63408')
 	
-	rchan := chan siroup.DetailResult{}
-	rch := chan siroup.DetailPropertiRup{}
-	drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
+	//rchan := chan siroup.DetailResult{}
+	//rch := chan siroup.DetailPropertiRup{}
+	//drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
 	//println(drs)
-	dpr := siroup.decode_detail(drs, rch)
+	//dpr := siroup.decode_detail(drs, rch)
 	//println(dpr)
-	c.update_detail(dpr)
-	rchan.close()
-	rch.close()
+	//c.update_detail(dpr)
+	//rchan.close()
+	//rch.close()
 	
 }
 

@@ -47,6 +47,7 @@ enum MetodePengadaan {
 	dikecualikan
 	pengadaanlangsung
 	penunjukanlangsung
+	unknown
 }
 
 pub fn (mp MetodePengadaan) str() string {
@@ -58,6 +59,7 @@ pub fn (mp MetodePengadaan) str() string {
 		.dikecualikan { 'Dikecualikan' }
 		.pengadaanlangsung { 'Pengadaan Langsung' }
 		.penunjukanlangsung { 'Penunjukan Langsung' }
+		.unknown {'Unknown'}
 	}
 }
 
@@ -70,7 +72,7 @@ pub fn metode_from_str(m string) MetodePengadaan {
 		'Dikecualikan' { MetodePengadaan.dikecualikan }
 		'Pengadaan Langsung' { MetodePengadaan.pengadaanlangsung }
 		'Penunjukan Langsung' { MetodePengadaan.penunjukanlangsung }
-		else { MetodePengadaan.pengadaanlangsung }
+		else {MetodePengadaan.unknown}
 	}
 }
 

@@ -232,7 +232,7 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 	return rv
 }
 
-fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
+pub fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 	mut rv := []Rup{}
 	// res := fetch_pyd_persatker(id_satker, tahun) ?
 	dval := json.decode(RawResponse, src) ?
