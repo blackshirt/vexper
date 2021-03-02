@@ -16,8 +16,8 @@ pub fn (rs Result) data() []Store {
 type Store = RekapAnggaranKbm | RekapAnggaranSatker | RekapKegiatanKbm | RekapKegiatanSatker |
 	Rup
 
-// `parse_all_rup_from_satker` parse response data dari satker `id_satker` dalam `ds` ke dalam array `Rup` struct
-pub fn parse_all_rup_from_satker(ds []Response) ?[]Rup {
+// `parse_rup_from_satker` parse response data dari satker `id_satker` dalam `ds` ke dalam array `Rup` struct
+fn parse_rup_from_satker(ds []FetchResponse) ?[]Rup {
 	mut results := []Rup{}
 	for resp in ds {
 		ops := resp.opsi as OpsiKegiatan
@@ -29,21 +29,22 @@ pub fn parse_all_rup_from_satker(ds []Response) ?[]Rup {
 }
 
 // `parse_all_rup` parse response data dalam `ds` ke dalam array `Rup` struct
-pub fn parse_all_rup(ds []Response) ?[]Rup {
+fn parse_all_rup(ds []FetchResponse) ?[]Rup {
 	mut results := []Rup{}
 	for resp in ds {
 		tipe := resp.opsi as OpsiKegiatan
-		keg := tipe.keg
-		rups := parse_allsatker_bytipe(keg, resp.body,resp.tahun) ?
+		//keg := tipe.keg
+		rups := parse_allsatker_bytipe(tipe.keg, resp.body, resp.tahun) ?
 		results << rups
 	}
 	return results
 }
 
+fn parse_rekap() {}
 // `parse_response` parses responses data from the results of fetch operation in 
-// Response `r` params and return `Result`, underlying data stored in result `data` 
+// FetchResponse `r` params and return `Result`, underlying data stored in result `data` 
 // with len `len`
-pub fn parse_response(r Response) ?Result {
+pub fn parse_response(r FetchResponse) ?Result {
 	if r.opsi is OpsiKegiatan {
 		mut res := Result{}
 		if r.opsi.per_satker {

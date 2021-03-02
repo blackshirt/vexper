@@ -8,7 +8,7 @@ fn (c CPool) update_rup(rup Rup) ?int {
 				sumber_dana = '${rup.sumber_dana}', kegiatan = '${rup.kegiatan}', \
 				year = '${rup.year}', last_updated = '${rup.last_updated}', \
 				tipe = '${rup.tipe}' where kode_rup = '${rup.kode_rup}';"
-		_, code := c.exec(q)
+		code := c.exec_none(q) ?
 		if code !in [0, 101] {
 			return error(" Error in query exec with code : ${code}")
 		}
@@ -24,7 +24,8 @@ fn (c CPool) update_rups(rups []Rup) ? {
 	}
 	c.exec('BEGIN TRANSACTION')
 	for rup in rups {
-		c.update_rup(rup)?
+		code := c.update_rup(rup)?
+		println("Update ${rup.kode_rup} result: ${code}")
 	}
 	c.exec('COMMIT')
 }
@@ -42,23 +43,24 @@ fn (c CPool) save_rup(rup Rup) ?int {
 				'${rp.last_updated}', '${rp.tipe}', '${rp.tipe_swakelola}', '${rp.jenis}') \
 				on conflict do nothing"
 				
-		_, code := c.exec(q)
+		code := c.exec_none(q) ?
 		if code !in [0, 101] {
-			return error(" Error in insert query with code : ${code}")
+			return error(" #Error insert ${rup.kode_rup} with code : ${code}")
 		}
 		return code
 	}
-	return error("Rup ${rup.kode_rup} was exists in db, use update instead")
+	return error("Rup ${rup.kode_rup} was exist in db, use update instead")
 }
 
 // insert array of rup
-fn (c CPool) save_rup(rups []Rup) ? {
+fn (c CPool) save_rups(rups []Rup) ? {
 	if rups.len == 0 {
 		return
 	}
 	c.exec('BEGIN TRANSACTION')
 	for rup in rups {
-		_ := c.save_rup(rup) ?
+		code := c.save_rup(rup) ?
+		println("Insert ${rup.kode_rup} with result : ${code}")
 	}
 	c.exec('COMMIT')
 }

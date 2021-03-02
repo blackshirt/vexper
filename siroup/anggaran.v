@@ -9,10 +9,10 @@ fn (c CPool) update_anggaran_sekbm(akm RekapAnggaranKbm) ?int {
 				tot_anggaran_swa='${akm.tot_anggaran_swa}', tot_anggaran_pds='${akm.tot_anggaran_pds}', \
 				tot_anggaran_semua='${akm.tot_anggaran_semua}', last_updated='${akm.last_updated}' \
 				where kode_kldi='${akm.kode_kldi}';"
-		_, code := c.exec(q)
+		code := c.exec_none(q) ?
 		println("update anggaran kbm...$code")
 		if code !in [0, 101] {
-			return error(" Error in update akm with code : ${code}")
+			return error(" Error in update akm ${akm.kode_kldi} with code : ${code}")
 		}
 		return code
 	}

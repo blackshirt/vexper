@@ -15,7 +15,7 @@ fn (c CPool) update_kegiatan_sekbm(rkm RekapKegiatanKbm) ?int {
 	code := c.exec_none(q) ?
 	println("Update kegiatan kbm......$code")
 	if code !in [0, 101] {
-		return error("Fail in update with code ${code}")
+		return error("Fail in update rkm ${rkm.kode_kldi} with code ${code}")
 	}
 	return code
 }
@@ -42,21 +42,22 @@ pub fn (c CPool) save_kegiatan_sekbm(rkm RekapKegiatanKbm){
 	return code
 }
 
-
+// update kegiatan persatker
 fn (c CPool) update_kegiatan_persatker(opd RekapKegiatanSatker) {
 	q := 'update RekapKegiatanSatker set tot_pyd = ${opd.tot_pyd}, \
 				tot_pagu_pyd = ${opd.tot_pagu_pyd}, tot_swa = ${opd.tot_swa}, \
 				tot_pagu_swa = ${opd.tot_pagu_swa}, tot_pds = ${opd.tot_pds}, \
 				last_updated = ${opd.last_updated} where kode_satker=${opd.kode_satker}'
 				// println(q)
-	println("Updating.....'${opd.nama_satker}'")
-	code := c.exec_none(q)
+	println("Updating.....${opd.nama_satker}")
+	code := c.exec_none(q) ?
 	if code !in [0, 101] {
 		return error("Error update : ${code}")
 	}
 	return code
 }
 
+//update array of kegiatan satker
 fn (c CPool) update_kegiatan_satker(stk []RekapKegiatanSatker) {
 	if stk.len == 0 {
 		return
@@ -70,7 +71,7 @@ fn (c CPool) update_kegiatan_satker(stk []RekapKegiatanSatker) {
 }
 
 
-// insert single entri to kegiatan satker
+// insert single entri rekap kegiatan satker
 fn (c CPool) save_kegiatan_persatker(opd RekapKegiatanSatker) {
 	if c.satker_exist_dikegiatan(opd.kode_satker) {
 		eprintln("satker ${opd.kode_satker} exist, use update instead")
@@ -91,6 +92,8 @@ fn (c CPool) save_kegiatan_persatker(opd RekapKegiatanSatker) {
 	return code
 }
 
+
+// insert array of rekap kegiatan satker
 pub fn (c CPool) save_kegiatan_satker(stk []RekapKegiatanSatker) {
 	if stk.len == 0 {
 		return
