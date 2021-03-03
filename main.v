@@ -36,12 +36,14 @@ fn main() {
 	c.save_rups(rups) or { panic(err) }
 	*/
 
-	
+
 	/*
 	Untuk mengcompare rups di db dan dari net
 	*/
-	res := siroup.all_rup_from_satker('63403', '2021') or {panic(err)}
+	res := siroup.all_rup_from_satker('63412', '2021') or {panic(err)}
+	//println(res)
 	rups := siroup.parse_rup_from_satker(res) or {panic(err)}
+	//println(rups)
 	diff := c.compare_array_rup(rups) or { panic(err)}
 	println(diff)
 	
