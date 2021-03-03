@@ -3,25 +3,18 @@ module siroup
 import json
 import time
 
-struct Result {
-mut:
-	data []Store
-	len  int
-}
-
-pub fn (rs Result) data() []Store {
-	return rs.data
-}
-
-type Store = RekapAnggaranKbm | RekapAnggaranSatker | RekapKegiatanKbm | RekapKegiatanSatker |
-	Rup
+type Rekap = RekapAnggaranKbm | RekapAnggaranSatker | RekapKegiatanKbm | RekapKegiatanSatker
 
 // `parse_rup_from_satker` parse response data dari satker `id_satker` dalam `ds` ke dalam array `Rup` struct
-fn parse_rup_from_satker(ds []FetchResponse) ?[]Rup {
+pub fn parse_rup_from_satker(ds []FetchResponse) ?[]Rup {
+	if !ds.has_valid_kegiatan() {
+		eprintln('#Error, ds does not has valid kegiatan')
+		return error('#Error, ds does not has valid kegiatan')
+	}
 	mut results := []Rup{}
 	for resp in ds {
 		ops := resp.opsi as OpsiKegiatan
-		//keg := tipe.keg
+		// keg := tipe.keg
 		rups := parse_persatker_bytipe(ops.keg, resp.body, ops.id_satker, resp.tahun) ?
 		results << rups
 	}
@@ -29,29 +22,82 @@ fn parse_rup_from_satker(ds []FetchResponse) ?[]Rup {
 }
 
 // `parse_all_rup` parse response data dalam `ds` ke dalam array `Rup` struct
-fn parse_all_rup(ds []FetchResponse) ?[]Rup {
+pub fn parse_all_rup(ds []FetchResponse) ?[]Rup {
+	if !ds.has_valid_kegiatan() {
+		eprintln('#Error, ds does not has valid kegiatan')
+		return error("#Error not a valid opsi")
+	}
 	mut results := []Rup{}
 	for resp in ds {
 		tipe := resp.opsi as OpsiKegiatan
-		//keg := tipe.keg
+		// keg := tipe.keg
 		rups := parse_allsatker_bytipe(tipe.keg, resp.body, resp.tahun) ?
 		results << rups
 	}
 	return results
 }
 
-fn parse_rekap() {}
+pub fn parse_rekap(fr FetchResponse) ?[]Rekap {
+	if !fr.valid_rekap() {
+		return error("#Not valid rekap")
+	}
+	if fr.opsi is OpsiRekap {
+		match fr.opsi.jnr {
+			.anggaran_sekbm {
+				data := parse_anggaran_sekbm(fr.body, fr.tahun) ?
+				mut res := []Rekap{}
+				for i in data {
+					k := Rekap(i)
+					res << k
+				}
+				return res
+			}
+			.anggaran_satker {
+				data := parse_anggaran_satker(fr.body, fr.tahun) ?
+				mut res := []Rekap{}
+				for i in data {
+					k := Rekap(i)
+					res << k
+				}
+				return res
+			}
+			.kegiatan_satker {
+				data := parse_kegiatan_satker(fr.body, fr.tahun) ?
+				mut res := []Rekap{}
+				for i in data {
+					s := Rekap(i)
+					res << s
+				}
+				return res
+			}
+			.kegiatan_sekbm {
+				data := parse_kegiatan_sekbm(fr.body, fr.tahun) ?
+				mut res := []Rekap{}
+				// ck := k as RekapKegiatanKbm
+				for i in data {
+					s := Rekap(i)
+					res << s
+				}
+				return res
+			}
+		} // match
+	}
+	// if opsi rekap
+	return error('#Error not opsi rekap')
+}
+
 // `parse_response` parses responses data from the results of fetch operation in 
 // FetchResponse `r` params and return `Result`, underlying data stored in result `data` 
 // with len `len`
+/*
 pub fn parse_response(r FetchResponse) ?Result {
 	if r.opsi is OpsiKegiatan {
 		mut res := Result{}
 		if r.opsi.per_satker {
 			rup := parse_persatker_bytipe(r.opsi.keg, r.body, r.opsi.id_satker, r.tahun) ?
-			mut w := []Store{}
+			mut w := []Rekap{}
 			for i in rup {
-				k := Store(i)
+				k := Rekap(i)
 				w << k
 			}
 			res.data = w
@@ -59,9 +105,9 @@ pub fn parse_response(r FetchResponse) ?Result {
 			return res
 		} else {
 			rup := parse_allsatker_bytipe(r.opsi.keg, r.body, r.tahun) ?
-			mut w := []Store{}
+			mut w := []Rekap{}
 			for i in rup {
-				k := Store(i)
+				k := Rekap(i)
 				w << k
 			}
 			res.data = w
@@ -74,9 +120,9 @@ pub fn parse_response(r FetchResponse) ?Result {
 			.anggaran_sekbm {
 				mut res := Result{}
 				data := parse_anggaran_sekbm(r.body, r.tahun) ?
-				mut w := []Store{}
+				mut w := []Rekap{}
 				for i in data {
-					k := Store(i)
+					k := Rekap(i)
 					w << k
 				}
 				res.data = w
@@ -86,9 +132,9 @@ pub fn parse_response(r FetchResponse) ?Result {
 			.anggaran_satker {
 				mut res := Result{}
 				data := parse_anggaran_satker(r.body, r.tahun) ?
-				mut w := []Store{}
+				mut w := []Rekap{}
 				for i in data {
-					k := Store(i)
+					k := Rekap(i)
 					w << k
 				}
 				res.data = w
@@ -98,9 +144,9 @@ pub fn parse_response(r FetchResponse) ?Result {
 			.kegiatan_satker {
 				mut res := Result{}
 				data := parse_kegiatan_satker(r.body, r.tahun) ?
-				mut w := []Store{}
+				mut w := []Rekap{}
 				for i in data {
-					s := Store(i)
+					s := Rekap(i)
 					w << s
 				}
 				res.data = w
@@ -110,20 +156,20 @@ pub fn parse_response(r FetchResponse) ?Result {
 			.kegiatan_sekbm {
 				mut res := Result{}
 				data := parse_kegiatan_sekbm(r.body, r.tahun) ?
-				mut k := []Store{}
+				mut k := []Rekap{}
 				// ck := k as RekapKegiatanKbm
 				for i in data {
-					s := Store(i)
+					s := Rekap(i)
 					k << s
 				}
 				res.data = k
 				res.len = k.len
 				return res
 			}
-		
 		}
 	}
 }
+*/
 
 // `parse_persatker_bytipe` parse rup dengan tipe `t` dari satker `id_satker` pada `tahun` yang ditentukan
 fn parse_persatker_bytipe(t TipeKeg, src string, id_satker string, tahun string) ?[]Rup {
@@ -158,13 +204,13 @@ fn parse_pyd_allsatker(src string, tahun string) ?[]Rup {
 		rup.nama_paket = item[2]
 		rup.pagu = item[3]
 		// metode dalam bentuk MetodePengadaan
-		rup.metode = metode_from_str(item[4])
+		rup.metode = item[4]
 		rup.sumber_dana = item[5]
 		// rup.kode_rup = item[6]
 		rup.awal_pemilihan = item[7]
 		rup.kegiatan = item[2] // sama paket ??
 		rup.last_updated = time.now().str()
-		//rup.jenis belum ada
+		// rup.jenis belum ada
 		rup.year = tahun
 		rup.tipe = 'Penyedia'
 		rup.tipe_swakelola = 'non swakelola'
@@ -187,7 +233,7 @@ fn parse_swa_allsatker(src string, tahun string) ?[]Rup {
 		rup.nama_satker = item[1]
 		rup.nama_paket = item[2]
 		rup.pagu = item[3]
-		rup.metode = metode_from_str('Swakelola') // bentuk enum MetodePengadaan
+		rup.metode = 'Swakelola'
 		rup.sumber_dana = item[4]
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
@@ -218,7 +264,7 @@ fn parse_pds_allsatker(res string, tahun string) ?[]Rup {
 		rup.kegiatan = item[2]
 		rup.pagu = item[3]
 		rup.awal_pemilihan = item[4]
-		rup.metode = metode_from_str(item[5]) // enum form
+		rup.metode = item[5]
 		rup.sumber_dana = item[6]
 		// item[7] unknown
 		// item[8] unknown
@@ -247,7 +293,7 @@ pub fn parse_pyd_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.nama_paket = item[1]
 		rup.kegiatan = item[1] // sama nama paket ?
 		rup.pagu = item[2]
-		rup.metode = metode_from_str(item[3])
+		rup.metode = item[3]
 		rup.sumber_dana = item[4]
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
@@ -278,7 +324,7 @@ fn parse_swa_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.kode_satker = id_satker
 		rup.pagu = item[3]
 		// rup.metode not avaliable in swa, diisi Swakelola ?
-		rup.metode = metode_from_str('Swakelola')
+		rup.metode = 'Swakelola'
 		rup.sumber_dana = item[4]
 		// rup.kode_rup = item[5]
 		rup.awal_pemilihan = item[6]
@@ -305,7 +351,7 @@ fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.nama_paket = item[1]
 		rup.kegiatan = item[1] //??
 		rup.pagu = item[2]
-		rup.metode = metode_from_str(item[3])
+		rup.metode = item[3]
 		rup.sumber_dana = item[4]
 		// item[5] kode rup
 		rup.awal_pemilihan = item[6]
@@ -316,7 +362,7 @@ fn parse_pds_persatker(src string, id_satker string, tahun string) ?[]Rup {
 		rup.last_updated = time.now().str()
 		rup.year = tahun
 		rup.tipe = 'Penyedia dalam Swakelola'
-		//rup.jenis = 
+		// rup.jenis = 
 		rup.tipe_swakelola = 'non swakelola'
 		rv << rup
 	}

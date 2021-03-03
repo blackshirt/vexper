@@ -22,7 +22,8 @@ struct RupChangedVals {
 fn (c CPool) get_changes(rup Rup) ?[]RupChangedVals {
 	mut rcv := []RupChangedVals{}
 	if c.rup_withkode_exist(rup.kode_rup) {
-		q := "select kode_rup, nama_paket, sumber_dana, pagu, awal_pemilihan, metode, tahun from v_rups where kode_rup='$rup.kode_rup' limit 1"
+		q := "select kode_rup, nama_paket, sumber_dana, pagu, awal_pemilihan, \
+		metode, tahun from v_rups where kode_rup='${rup.kode_rup}' limit 1"
 		row := c.exec_one(q) ?
 		// cek kode rup exactly sama
 		if row.vals[0] == rup.kode_rup {
@@ -62,7 +63,7 @@ fn (c CPool) get_changes(rup Rup) ?[]RupChangedVals {
 				}
 				rcv << rc
 			}
-			if row.vals[5] != rup.metode.str() {
+			if row.vals[5].to_lower() != rup.metode.to_lower() {
 				rc := RupChangedVals{
 					kode_rup: rup.kode_rup
 					col_name: 'metode'

@@ -41,7 +41,38 @@ mut:
 	opsi  OpsiTipe
 }
 
-fn (frs []FetchResponse) 
+fn (frs []FetchResponse) has_valid_rekap() bool {
+	if frs.len == 0 {
+		return false
+	}
+	for i in frs {
+		if !i.valid_rekap() {
+			return false
+		}
+	}
+	return true
+}
+
+fn (frs []FetchResponse) has_valid_kegiatan() bool {
+	if frs.len == 0 {
+		return false
+	}
+	for i in frs {
+		if !i.valid_kegiatan() {
+			return false
+		}
+	}
+	return true
+}
+
+fn (fr FetchResponse) valid_rekap() bool {
+	return fr.opsi is OpsiRekap
+}
+
+fn (fr FetchResponse) valid_kegiatan() bool {
+	return fr.opsi is OpsiKegiatan
+}
+
 // cek validitas tahun
 fn valid(tahun string) bool {
 	// cek len dan tahun > 2000 
@@ -81,7 +112,6 @@ fn fetch_rup(tahun string, opsi OpsiKegiatan) ?FetchResponse {
 		resp.url = url
 		resp.body = text
 		resp.opsi = OpsiKegiatan{opsi.keg, false, opsi.id_satker}
-
 		return resp
 	}
 	return error('Error in fetch rup')

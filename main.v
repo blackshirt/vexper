@@ -10,84 +10,46 @@ import nedpals.vex.ctx
 fn main() {
 	db := sqlite.connect('db.sqlite3') or { panic(err) }
 	c := siroup.CPool{db, true}
-	//rup := c.rup_with_kode('26470707') or { panic(err) }
-	//jp := siroup.jenpeng_for_rup(rup) or {return}
-	//println(jp)
-	//rups := c.rup_from_satker('63421')
-	//urls := siroup.build_jenis_url_for_rups(rups) or {return}
-	//first_5urls := urls[..4]
-	//println(first_5urls)
-	
-	//jnres := chan siroup.DetailResult{}
-	//u := siroup.detail_rup_url(.pyd, '27219230') or {return}
-	//res := siroup.fetch_detail(rup) or {return}
-	//println(res)
-	//println(u)
-	//go siroup.send_request(u, jnres)
-	//mut result := siroup.DetailResult{}
-	//result = <- jnres
-	//println(dr)
-	//sisa := res.decode()
-	//println(sisa)
-	//jnres.close()
-	
-	
+
 	/*
-	for i in urls {
-		go siroup.send_request(i, jnres)
-	}
-	mut res := []siroup.DetailResult{}
-	for i := 0; i < urls.len; i++ {
-		item := <- jnres
-		res << item
-	}
-	for u in res {
-		println(u.url)
-	}
-	*/
-	//res := siroup.jenpeng_array_rup(rups, jnres) ?
-	//jnres.close()
-	//println(res)
-	//println(urls)
-	//println(rups)
-	//mjp := siroup.jenpeng_array_rup(rups) or {return }
-	//println(mjp)
-	/*
-	jnr := siroup.OpsiRekap{.kegiatan_satker}
-	rek := siroup.fetch('2021', jnr)  or {return}
-	res := siroup.parse_response(rek) or {return}
-	data := res.data()
+	Untuk mengambil rekap kegiatan satker
+	
+	
+	opsi := siroup.JnsRekap.kegiatan_satker
+	rek := siroup.fetch_rekap('2021', opsi) or {return}
+	res := siroup.parse_rekap(rek) or {return}
+	
 	mut stk := []siroup.RekapKegiatanSatker{}
-	for item in data {
+	for item in res {
 		m := item as siroup.RekapKegiatanSatker
 		stk << m
 	}
-	c.save_kegiatan_satker(stk)
+	c.save_kegiatan_satker(stk) or {panic(err)}
 	*/
 	
-	//println(stk)
-	res := siroup.penyedia_from_satker('63408', '2021') or {panic(err)}
-	println("Fetch ....$res")
-	rups := siroup.parse_pyd_persatker(res, '63408', '2021') or {panic(err)}
-	println(rups)
-	//c.save_rup(rups)
-	//println("Rups....$rups")
-	//println("from db")
-	//dbrup := c.rup_from_satker('99566')
-	//println("rup from db....$dbrup")
+
+	/*
+	Untuk mengambil semua rup dan menyimpan ke db
+	
+	res := siroup.all_rup('2021') ?
+	rups := siroup.parse_all_rup(res) or {panic(err)}
+	c.save_rups(rups) or { panic(err) }
+	*/
+
+	
+	/*
+	Untuk mengcompare rups di db dan dari net
+	*/
+	res := siroup.all_rup_from_satker('63403', '2021') or {panic(err)}
+	rups := siroup.parse_rup_from_satker(res) or {panic(err)}
 	diff := c.compare_array_rup(rups) or { panic(err)}
 	println(diff)
-	//for rup in rups {
-	//	println(rup)
-	//}
-	//println(rups)
-	//res := siroup.all_rup('2021') or {panic(err)}
-	//rups := siroup.parse_all_rup(res) or {panic(err)}
-	//c.save_rup(rups)
-	//res := c.daftar_satker()
-	//println(res)
-	//rups_satker := c.rup_from_satker('63408')
 	
+	
+	
+	/*
+	Concurrent version get detail rups
+	*/
 	//rchan := chan siroup.DetailResult{}
 	//rch := chan siroup.DetailPropertiRup{}
 	//drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}

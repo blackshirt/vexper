@@ -36,7 +36,7 @@ pub fn (c CPool) rup_with_kode(kode_rup string) ?Rup {
 		rup.awal_pemilihan = row.vals[6]
 		rup.tipe = row.vals[7]
 		rup.kegiatan = row.vals[8]
-		rup.metode = metode_from_str(row.vals[9])
+		rup.metode = row.vals[9]
 		rup.year = row.vals[10]
 		rup.last_updated = row.vals[11]
 		return rup
@@ -97,7 +97,7 @@ fn (c CPool) rup_bytipe(tipe TipeKeg) []Rup {
 		rup.awal_pemilihan = item.vals[6]
 		rup.tipe = item.vals[7]
 		rup.kegiatan = item.vals[8]
-		rup.metode = metode_from_str(item.vals[9]) 
+		rup.metode = item.vals[9]
 
 		// rup.jenis = jenis_pengadaan_from_str(item[11].str())
 		rup.year = item.vals[10]
@@ -136,7 +136,7 @@ pub fn (c CPool) all_rup() []Rup {
 		rup.awal_pemilihan = item.vals[6]
 		rup.tipe = item.vals[7]
 		rup.kegiatan = item.vals[8]
-		rup.metode = metode_from_str(item.vals[9]) 
+		rup.metode = item.vals[9]
 
 		//rup.jenis = jenis_pengadaan_from_str(item[11])
 		rup.year = item.vals[10]
@@ -167,7 +167,7 @@ pub fn (c CPool) rup_from_satker(kode_satker string) []Rup {
 		rup.awal_pemilihan = item.vals[6]
 		rup.tipe = item.vals[7]
 		rup.kegiatan = item.vals[8]
-		rup.metode = metode_from_str(item.vals[9])
+		rup.metode = item.vals[9]
 
 		// rup.jenis = jenis_pengadaan_from_str(item[11].str())
 		rup.year = item.vals[10]

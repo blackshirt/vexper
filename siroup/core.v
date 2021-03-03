@@ -132,7 +132,7 @@ mut:
 	tgl_perbaharui_paket string
 	tipe_swakelola       string // untuk swakelola
 	jenis                JenisPengadaan
-	metode               MetodePengadaan
+	metode               string
 	last_updated         string
 }
 

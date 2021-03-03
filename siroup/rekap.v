@@ -1,10 +1,12 @@
 module siroup
 
+import net.http
+
 pub struct OpsiRekap {
 	jnr JnsRekap
 }
 
-enum JnsRekap {
+pub enum JnsRekap {
 	anggaran_sekbm
 	anggaran_satker
 	kegiatan_sekbm
@@ -21,7 +23,7 @@ pub fn (jnr JnsRekap) str() string {
 }
 
 // fetch rekap
-fn fetch_rekap(tahun string, jr JnsRekap) ?FetchResponse {
+pub fn fetch_rekap(tahun string, jr JnsRekap) ?FetchResponse {
 	if !valid(tahun) {
 		eprintln('#Error not valid tahun')
 		return error('#Error not valid tahun')

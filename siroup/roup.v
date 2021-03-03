@@ -8,7 +8,7 @@ fn (c CPool) update_rup(rup Rup) ?int {
 				sumber_dana = '${rup.sumber_dana}', kegiatan = '${rup.kegiatan}', \
 				year = '${rup.year}', last_updated = '${rup.last_updated}', \
 				tipe = '${rup.tipe}' where kode_rup = '${rup.kode_rup}';"
-		code := c.exec_none(q) ?
+		code := c.exec_none(q) 
 		if code !in [0, 101] {
 			return error(" Error in query exec with code : ${code}")
 		}
@@ -43,7 +43,7 @@ fn (c CPool) save_rup(rup Rup) ?int {
 				'${rp.last_updated}', '${rp.tipe}', '${rp.tipe_swakelola}', '${rp.jenis}') \
 				on conflict do nothing"
 				
-		code := c.exec_none(q) ?
+		code := c.exec_none(q) 
 		if code !in [0, 101] {
 			return error(" #Error insert ${rup.kode_rup} with code : ${code}")
 		}
@@ -53,7 +53,7 @@ fn (c CPool) save_rup(rup Rup) ?int {
 }
 
 // insert array of rup
-fn (c CPool) save_rups(rups []Rup) ? {
+pub fn (c CPool) save_rups(rups []Rup) ? {
 	if rups.len == 0 {
 		return
 	}

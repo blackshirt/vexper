@@ -48,7 +48,7 @@ VALUES
     ),
     (
         4,
-        "e-Purchasing",
+        "E-Purchasing",
         "e-Purchasing aka e-catalog"
     ),
     (
