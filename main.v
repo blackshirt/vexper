@@ -39,28 +39,28 @@ fn main() {
 
 	/*
 	Untuk mengcompare rups di db dan dari net
-	*/
-	res := siroup.all_rup_from_satker('63412', '2021') or {panic(err)}
+	
+	res := siroup.all_rup_from_satker('63408', '2021') or {panic(err)}
 	//println(res)
 	rups := siroup.parse_rup_from_satker(res) or {panic(err)}
 	//println(rups)
-	diff := c.compare_array_rup(rups) or { panic(err)}
+	diff := c.compare_rups(rups) or { panic(err)}
 	println(diff)
-	
+	*/
 	
 	
 	/*
 	Concurrent version get detail rups
 	*/
-	//rchan := chan siroup.DetailResult{}
-	//rch := chan siroup.DetailPropertiRup{}
-	//drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
+	rchan := chan siroup.DetailResult{}
+	rch := chan siroup.DetailPropertiRup{}
+	drs := c.fetch_detail_from_satker_conccurently('63403', rchan) or {return}
 	//println(drs)
-	//dpr := siroup.decode_detail(drs, rch)
+	dpr := siroup.decode_detail(drs, rch)
 	//println(dpr)
-	//c.update_detail(dpr)
-	//rchan.close()
-	//rch.close()
+	c.update_detail(dpr)
+	rchan.close()
+	rch.close()
 	
 }
 

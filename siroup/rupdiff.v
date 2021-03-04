@@ -1,4 +1,5 @@
 module siroup
+import sqlite
 
 struct RupChangeSet {
 mut:
@@ -13,16 +14,16 @@ struct RupChangedVals {
 	new_val  string
 }
 
+// get changes of rup in the form of array of RupChangedVals
+// `rup` was result from net fetch
 fn (c CPool) get_changes(rup Rup) ?[]RupChangedVals {
 	mut rcv := []RupChangedVals{}
-	if c.has_same_value(rup) {
-		return rcv
-	}
+	
 	if c.rup_withkode_exist(rup.kode_rup) {
-		q := "select kode_rup, nama_paket, sumber_dana, pagu, awal_pemilihan, \
-		metode, tahun from v_rups where kode_rup='$rup.kode_rup' limit 1"
-		row := c.exec_one(q) ?
-
+		status, row := c.has_changed(rup)
+		if !status {
+			return rcv // empty
+		}
 		if row.vals[1] != rup.nama_paket {
 			rc := RupChangedVals{
 				kode_rup: rup.kode_rup
@@ -77,15 +78,17 @@ fn (c CPool) get_changes(rup Rup) ?[]RupChangedVals {
 			}
 			rcv << rc
 		}
+		return rcv
 	}
-	return rcv
+	return error("#Error ${rup.kode_rup} does not exist")
 }
 
+// cek rup punya value tetap antara db dan net
 fn (c CPool) has_same_value(rup Rup) (bool, sqlite.Row) {
 	q := "select kode_rup, nama_paket, sumber_dana, pagu, awal_pemilihan, \
-	metode, tahun from v_rups where kode_rup='$rup.kode_rup' limit 1"
-	row := c.exec_one(q) or { return false, row } // sqlite.Row ==> vals []string
-
+	metode, tahun from v_rups where kode_rup='${rup.kode_rup}' limit 1"
+	row := c.exec_one(q) or {panic(err)} // sqlite.Row ==> vals []string
+	if row.vals.len == 0 { return false, row }
 	// return if all col to be checked has same value
 	result := row.vals[0] == rup.kode_rup && row.vals[1] == rup.nama_paket
 		&& row.vals[2] == rup.sumber_dana && row.vals[3] == rup.pagu
@@ -94,12 +97,15 @@ fn (c CPool) has_same_value(rup Rup) (bool, sqlite.Row) {
 	return result, row
 }
 
+// cek rup antara db dan net ada perubahan
 fn (c CPool) has_changed(rup Rup) (bool, sqlite.Row) {
 	res, row := c.has_same_value(rup)
-	return !res, row
+	status := res == false
+	return status, row
 }
 
-pub fn (c CPool) compare_array_rup(rups []Rup) ?RupChangeSet {
+// compare banyak rup antara db dan net
+pub fn (c CPool) compare_rups(rups []Rup) ?RupChangeSet {
 	if rups.len == 0 {
 		eprintln('rups with len 0')
 		return RupChangeSet{}
@@ -112,11 +118,14 @@ pub fn (c CPool) compare_array_rup(rups []Rup) ?RupChangeSet {
 			println('New rup $rup.kode_rup')
 			rcs.fresh << rup
 		}
-		// cek sama atau tidak
-		if c.has_changed(rup) {
-			changes := c.get_changes(rup) ?
-			rcs.changed[rup.kode_rup] = changes
+		// cek berubah atau tidak
+		status, _ := c.has_changed(rup)
+		if !status {
+			continue
 		}
+		changes := c.get_changes(rup) ?
+		rcs.changed[rup.kode_rup] = changes
+		
 	}
 	return rcs
 }

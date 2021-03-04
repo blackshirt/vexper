@@ -37,6 +37,7 @@ pub fn parse_all_rup(ds []FetchResponse) ?[]Rup {
 	return results
 }
 
+// parse rekap entri, return []Rekap, a sum type
 pub fn parse_rekap(fr FetchResponse) ?[]Rekap {
 	if !fr.valid_rekap() {
 		return error("#Not valid rekap")
@@ -86,90 +87,6 @@ pub fn parse_rekap(fr FetchResponse) ?[]Rekap {
 	return error('#Error not opsi rekap')
 }
 
-// `parse_response` parses responses data from the results of fetch operation in 
-// FetchResponse `r` params and return `Result`, underlying data stored in result `data` 
-// with len `len`
-/*
-pub fn parse_response(r FetchResponse) ?Result {
-	if r.opsi is OpsiKegiatan {
-		mut res := Result{}
-		if r.opsi.per_satker {
-			rup := parse_persatker_bytipe(r.opsi.keg, r.body, r.opsi.id_satker, r.tahun) ?
-			mut w := []Rekap{}
-			for i in rup {
-				k := Rekap(i)
-				w << k
-			}
-			res.data = w
-			res.len = rup.len
-			return res
-		} else {
-			rup := parse_allsatker_bytipe(r.opsi.keg, r.body, r.tahun) ?
-			mut w := []Rekap{}
-			for i in rup {
-				k := Rekap(i)
-				w << k
-			}
-			res.data = w
-			res.len = rup.len
-			return res
-		}
-	}
-	if r.opsi is OpsiRekap {
-		match r.opsi.jnr {
-			.anggaran_sekbm {
-				mut res := Result{}
-				data := parse_anggaran_sekbm(r.body, r.tahun) ?
-				mut w := []Rekap{}
-				for i in data {
-					k := Rekap(i)
-					w << k
-				}
-				res.data = w
-				res.len = w.len
-				return res
-			}
-			.anggaran_satker {
-				mut res := Result{}
-				data := parse_anggaran_satker(r.body, r.tahun) ?
-				mut w := []Rekap{}
-				for i in data {
-					k := Rekap(i)
-					w << k
-				}
-				res.data = w
-				res.len = data.len
-				return res
-			}
-			.kegiatan_satker {
-				mut res := Result{}
-				data := parse_kegiatan_satker(r.body, r.tahun) ?
-				mut w := []Rekap{}
-				for i in data {
-					s := Rekap(i)
-					w << s
-				}
-				res.data = w
-				res.len = data.len
-				return res
-			}
-			.kegiatan_sekbm {
-				mut res := Result{}
-				data := parse_kegiatan_sekbm(r.body, r.tahun) ?
-				mut k := []Rekap{}
-				// ck := k as RekapKegiatanKbm
-				for i in data {
-					s := Rekap(i)
-					k << s
-				}
-				res.data = k
-				res.len = k.len
-				return res
-			}
-		}
-	}
-}
-*/
 
 // `parse_persatker_bytipe` parse rup dengan tipe `t` dari satker `id_satker` pada `tahun` yang ditentukan
 fn parse_persatker_bytipe(t TipeKeg, src string, id_satker string, tahun string) ?[]Rup {

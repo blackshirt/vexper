@@ -7,6 +7,8 @@ pub struct CPool {
 mut:
 	use_safe_ops bool
 }
+
+
 fn (c CPool) koderup_from_satker(kode_satker string) ?[]string {
 	if c.satker_exist_dikegiatan(kode_satker) {
 		mut krups := []string{}
@@ -152,7 +154,6 @@ pub fn (c CPool) rup_from_satker(kode_satker string) []Rup {
 	sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, metode, \
 	tahun, last_updated from v_rups where kode_satker='${kode_satker}'"
 
-	// q := "select * from v_rups where kode_satker='${kode_satker}'"
 	rows, _ := c.exec(q) //[]sqlite.Row
 
 	// return rows
