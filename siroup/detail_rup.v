@@ -40,27 +40,58 @@ mut:
 	jenis_pengadaan           string
 	usaha_kecil               string = 'Ya'
 	awal_pemilihan            string // sudah difetch di daftar rup
-	akhir_pemilihan           string
-	awal_pelaksanaan_kontrak  string
-	akhir_pelaksanaan_kontrak string
-	awal_pemanfaatan          string
-	akhir_pemanfaatan         string
-	tgl_perbaharui_paket      string
+	akhir_pemilihan           string = 'Unknown'
+	awal_pelaksanaan_kontrak  string = 'Unknown'
+	akhir_pelaksanaan_kontrak string = 'Unknown'
+	awal_pemanfaatan          string = 'Unknown'
+	akhir_pemanfaatan         string = 'Unknown'
+	tgl_perbaharui_paket      string = 'Unknown'
 	tipe_swakelola            string = '1' // untuk yang swakelola, default tipe 1
 }
 
-pub fn (c CPool) update_detail(dpr []DetailPropertiRup) {
+fn (c CPool) update_detail_penyedia(dr DetailPropertiRup) ?int {
+	if c.is_penyedia(dr.kode_rup) {
+		jenis := jenis_pengadaan_from_str(dr.jenis_pengadaan)
+		q := "update Rup set jenis='${jenis}', usaha_kecil='${dr.usaha_kecil}', \
+		akhir_pemilihan='${dr.akhir_pemilihan}', awal_pelaksanaan='${dr.awal_pelaksanaan_kontrak}', \
+		akhir_pelaksanaan='${dr.akhir_pelaksanaan_kontrak}', awal_pemanfaatan='${dr.awal_pemanfaatan}',\
+		akhir_pemanfaatan='${dr.akhir_pemanfaatan}', tgl_perbaharui_paket='${dr.tgl_perbaharui_paket}', \
+		tipe_swakelola='${dr.tipe_swakelola}' where kode_rup='${dr.kode_rup}'"
+		code := c.exec_none(q)
+		if code !in [0, 101] { 
+			return error("#Error update detail")
+		}
+		return code
+	}
+	return error("#Error not penyedia")	
+}
+
+fn (c CPool) update_detail_swakelola(dr DetailPropertiRup) ?int {
+	if c.is_swakelola(dr.kode_rup) {
+		jenis := jenis_pengadaan_from_str(dr.jenis_pengadaan)
+		q := "update Rup set jenis='${jenis}', usaha_kecil='${dr.usaha_kecil}', awal_pemanfaatan='${dr.awal_pemanfaatan}',\
+		akhir_pemanfaatan='${dr.akhir_pemanfaatan}', tgl_perbaharui_paket='${dr.tgl_perbaharui_paket}', \
+		tipe_swakelola='${dr.tipe_swakelola}' where kode_rup='${dr.kode_rup}'"
+		code := c.exec_none(q)
+		if code !in [0, 101] { 
+			return error("#Error update detail")
+		}
+		return code
+	}
+	return error("#Error not swakelola")
+}
+
+pub fn (c CPool) update_detail(dpr []DetailPropertiRup) ? {
 	c.exec("BEGIN TRANSACTION")
 	for item in dpr {
-		jenis := jenis_pengadaan_from_str(item.jenis_pengadaan)
-		q := "update Rup set jenis='${jenis}', usaha_kecil='${item.usaha_kecil}', \
-		akhir_pemilihan='${item.akhir_pemilihan}', awal_pelaksanaan='${item.awal_pelaksanaan_kontrak}', \
-		akhir_pelaksanaan='${item.akhir_pelaksanaan_kontrak}', awal_pemanfaatan='${item.awal_pemanfaatan}',\
-		akhir_pemanfaatan='${item.akhir_pemanfaatan}', tgl_perbaharui_paket='${item.tgl_perbaharui_paket}', \
-		tipe_swakelola='${item.tipe_swakelola}' where kode_rup='${item.kode_rup}'"
-		println("Begin update ...'${item.kode_rup}'")
-		_, code := c.exec(q)
-		println("Finish update '${item.kode_rup}'...'$code'")
+		if c.is_penyedia(item.kode_rup) {
+			code := c.update_detail_penyedia(item) ?
+			println("Update detail penyedia ${item.kode_rup} ...${code}")
+		}
+		if c.is_swakelola(item.kode_rup) {
+			code := c.update_detail_swakelola(item) ?
+			println("Update detail swakelola ${item.kode_rup}....${code}")
+		}
 	}
 	c.exec("COMMIT")
 }

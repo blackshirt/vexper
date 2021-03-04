@@ -20,8 +20,8 @@ fn (c CPool) get_changes(rup Rup) ?[]RupChangedVals {
 	mut rcv := []RupChangedVals{}
 	
 	if c.rup_withkode_exist(rup.kode_rup) {
-		status, row := c.has_changed(rup)
-		if !status {
+		changed, row := c.has_changed(rup)
+		if !changed {
 			return rcv // empty
 		}
 		if row.vals[1] != rup.nama_paket {
@@ -99,9 +99,9 @@ fn (c CPool) has_same_value(rup Rup) (bool, sqlite.Row) {
 
 // cek rup antara db dan net ada perubahan
 fn (c CPool) has_changed(rup Rup) (bool, sqlite.Row) {
-	res, row := c.has_same_value(rup)
-	status := res == false
-	return status, row
+	same, row := c.has_same_value(rup)
+	changed := same == false
+	return changed, row
 }
 
 // compare banyak rup antara db dan net
@@ -119,8 +119,8 @@ pub fn (c CPool) compare_rups(rups []Rup) ?RupChangeSet {
 			rcs.fresh << rup
 		}
 		// cek berubah atau tidak
-		status, _ := c.has_changed(rup)
-		if !status {
+		changed, _ := c.has_changed(rup)
+		if !changed {
 			continue
 		}
 		changes := c.get_changes(rup) ?

@@ -1,5 +1,27 @@
 module siroup
 
+fn (c CPool) is_penyedia(kode_rup string) bool {
+	if c.rup_withkode_exist(kode_rup) {
+		q := "select tipe from Rup where kode_rup='${kode_rup}' LIMIT 1;"
+		t := c.q_string(q)
+		if t in ['Penyedia', 'Penyedia dalam Swakelola'] {
+			return true
+		}
+		return false
+	}
+	return false
+}
+
+fn (c CPool) is_swakelola(kode_rup string) bool {
+	if c.rup_withkode_exist(kode_rup) {
+		q := "select tipe from Rup where kode_rup='${kode_rup}' LIMIT 1;"
+		t := c.q_string(q)
+		if t == 'Swakelola' { return true }
+		return false
+	}
+	return false
+	
+}
 
 fn (c CPool) kldi_exist_dikegiatan(kode_kldi string) bool {
 	q := "SELECT EXISTS(SELECT 1 FROM RekapKegiatanKbm WHERE kode_kldi='$kode_kldi' LIMIT 1);"
