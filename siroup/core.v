@@ -121,17 +121,17 @@ mut:
 	sumber_dana          string
 	awal_pemilihan       string
 	akhir_pemilihan      string
-	awal_pelaksanaan     string
-	akhir_pelaksanaan    string
-	awal_pemanfaatan     string
-	akhir_pemanfaatan    string
+	awal_pelaksanaan     string // detail part
+	akhir_pelaksanaan    string // detail part
+	awal_pemanfaatan     string // detail part
+	akhir_pemanfaatan    string // detail part
 	kegiatan             string
 	year                 string
 	tipe                 string
-	usaha_kecil          string
-	tgl_perbaharui_paket string
-	tipe_swakelola       string // untuk swakelola
-	jenis                JenisPengadaan
+	usaha_kecil          string // detail part
+	tgl_perbaharui_paket string // detail part
+	tipe_swakelola       string // untuk swakelola, detail part
+	jenis                JenisPengadaan // detail part
 	metode               string
 	last_updated         string
 }

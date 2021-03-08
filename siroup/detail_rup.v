@@ -22,18 +22,6 @@ mut:
 	err_msg  string
 }
 
-fn (dr DetailResult) result_in_oops() bool {
-	mut doc := html.parse(dr.body)
-	tags := doc.get_tag('h1') //<h1 class="header">Oops, sabar ya !</h1>
-	for tag in tags {
-		if 'class' in tag.attributes && tag.attributes['class'] == 'header' && tag.text() == 'Oops, sabar ya !' {
-			// error happen
-			return true
-		}
-	}
-	return false
-}
-
 struct DetailPropertiRup {
 mut:
 	kode_rup                  string
@@ -48,6 +36,45 @@ mut:
 	tgl_perbaharui_paket      string = 'Unknown'
 	tipe_swakelola            string = '1' // untuk yang swakelola, default tipe 1
 }
+
+fn (dr DetailResult) result_in_oops() bool {
+	mut doc := html.parse(dr.body)
+	tags := doc.get_tag('h1') //<h1 class="header">Oops, sabar ya !</h1>
+	for tag in tags {
+		if 'class' in tag.attributes && tag.attributes['class'] == 'header' && tag.text() == 'Oops, sabar ya !' {
+			// error happen
+			return true
+		}
+	}
+	return false
+}
+
+// maybe using array.filter
+fn (c CPool) filter_rup_detail_belum_keupdate(rups []Rup) []Rup {
+	/*
+	res := rups.filter(fn (r Rup) bool {
+		return !c.rup_detail_has_been_updated(r)
+	})
+	return res
+	*/
+	mut res := []Rup{}
+	for rup in rups {
+		if c.rup_detail_has_been_updated(rup) {
+			continue
+		}
+		res << rup
+	}
+	return res
+}
+
+fn (c CPool) rup_detail_has_been_updated(rup Rup) bool {
+	match rup.tipe {
+		'Penyedia', 'Penyedia dalam Swakelola' { return c.detail_penyedia_has_been_updated(rup.kode_rup) }
+		'Swakelola' { return c.detail_swakelola_has_been_updated(rup.kode_rup) }
+		else { return false }
+	}
+}
+
 
 fn (c CPool) update_detail_penyedia(dr DetailPropertiRup) ?int {
 	if c.is_penyedia(dr.kode_rup) {
