@@ -136,6 +136,14 @@ mut:
 	last_updated         string
 }
 
+fn (r Rup) is_penyedia() bool {
+	return r.tipe == 'Penyedia' || r.tipe == 'Penyedia dalam Swakelola'
+}
+
+fn (r Rup) is_swakelola() bool {
+	return r.tipe == 'Swakelola'
+}
+
 // ["D128","Pemerintah Daerah Kabupaten Kebumen",
 // "130579571100","76459681099","2316174000","209355426199"]
 struct RekapAnggaranKbm {

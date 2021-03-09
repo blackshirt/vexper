@@ -8,7 +8,7 @@ mut:
 	use_safe_ops bool
 }
 
-
+// gets arrays of `kode_rup` from satker `kode_satker`
 fn (c CPool) koderup_from_satker(kode_satker string) ?[]string {
 	if c.satker_exist_dikegiatan(kode_satker) {
 		mut krups := []string{}

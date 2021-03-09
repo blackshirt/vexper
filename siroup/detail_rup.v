@@ -49,6 +49,7 @@ fn (dr DetailResult) result_in_oops() bool {
 	return false
 }
 
+
 // maybe using array.filter
 fn (c CPool) filter_rup_detail_belum_keupdate(rups []Rup) []Rup {
 	/*
