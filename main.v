@@ -54,7 +54,7 @@ fn main() {
 	*/
 	rchan := chan siroup.DetailResult{}
 	rch := chan siroup.DetailPropertiRup{}
-	drs := c.fetch_detail_from_satker_conccurently('63408', rchan) or {return}
+	drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
 	//println(drs)
 	dpr := siroup.decode_detail(drs, rch)
 	//println(dpr)

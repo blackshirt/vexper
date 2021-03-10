@@ -25,8 +25,10 @@ fn (c CPool) koderup_from_satker(kode_satker string) ?[]string {
 pub fn (c CPool) rup_with_kode(kode_rup string) ?Rup {
 	if c.rup_withkode_exist(kode_rup) {
 		q := "select nama_satker, kode_satker, kode_rup, nama_paket, \
-			sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, \
-			metode, tahun, last_updated from v_rups where kode_rup='${kode_rup}' limit 1"
+		sumber_dana, pagu, awal_pemilihan, akhir_pemilihan, \
+		awal_pelaksanaan, akhir_pelaksanaan, awal_pemanfaatan, \
+		akhir_pemanfaatan, tipe, kegiatan, \
+		metode, tahun, last_updated from v_rups where kode_rup='${kode_rup}' limit 1"
 		row := c.exec_one(q)?
 		mut rup := Rup{}
 		rup.nama_satker = row.vals[0]
@@ -36,11 +38,18 @@ pub fn (c CPool) rup_with_kode(kode_rup string) ?Rup {
 		rup.sumber_dana = row.vals[4]
 		rup.pagu = row.vals[5]
 		rup.awal_pemilihan = row.vals[6]
-		rup.tipe = row.vals[7]
-		rup.kegiatan = row.vals[8]
-		rup.metode = row.vals[9]
-		rup.year = row.vals[10]
-		rup.last_updated = row.vals[11]
+		rup.akhir_pemilihan = row.vals[7]
+		rup.awal_pelaksanaan = row.vals[8]
+		rup.akhir_pelaksanaan = row.vals[9]
+		rup.awal_pemanfaatan = row.vals[10]
+		rup.akhir_pemanfaatan = row.vals[11]
+		rup.tipe = row.vals[12]
+		rup.kegiatan = row.vals[13]
+		rup.metode = row.vals[14]
+
+		//rup.jenis = jenis_pengadaan_from_str(item[11])
+		rup.year = row.vals[15]
+		rup.last_updated = row.vals[16]
 		return rup
 	}
 	return error("rup with kode rup ${kode_rup} doesn't exist in db")
@@ -83,10 +92,11 @@ fn (c CPool) prepare_rup(r Rup) Rup {
 fn (c CPool) rup_bytipe(tipe TipeKeg) []Rup {
 	mut rups := []Rup{}
 
-	// tp := tipe.str()
 	q := "select nama_satker, kode_satker, kode_rup, nama_paket, \
-	sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, metode, \
-	tahun, last_updated from v_rups where tipe='$tipe.str()'"
+	sumber_dana, pagu, awal_pemilihan, akhir_pemilihan, \
+	awal_pelaksanaan, akhir_pelaksanaan, awal_pemanfaatan, \
+	akhir_pemanfaatan, tipe, kegiatan, \
+	metode, tahun, last_updated from v_rups where tipe='${tipe}'"
 	rows, _ := c.exec(q)
 	for item in rows {
 		mut rup := Rup{}
@@ -97,13 +107,18 @@ fn (c CPool) rup_bytipe(tipe TipeKeg) []Rup {
 		rup.sumber_dana = item.vals[4]
 		rup.pagu = item.vals[5]
 		rup.awal_pemilihan = item.vals[6]
-		rup.tipe = item.vals[7]
-		rup.kegiatan = item.vals[8]
-		rup.metode = item.vals[9]
+		rup.akhir_pemilihan = item.vals[7]
+		rup.awal_pelaksanaan = item.vals[8]
+		rup.akhir_pelaksanaan = item.vals[9]
+		rup.awal_pemanfaatan = item.vals[10]
+		rup.akhir_pemanfaatan = item.vals[11]
+		rup.tipe = item.vals[12]
+		rup.kegiatan = item.vals[13]
+		rup.metode = item.vals[14]
 
-		// rup.jenis = jenis_pengadaan_from_str(item[11].str())
-		rup.year = item.vals[10]
-		rup.last_updated = item.vals[11]
+		//rup.jenis = jenis_pengadaan_from_str(item[11])
+		rup.year = item.vals[15]
+		rup.last_updated = item.vals[16]
 		rups << rup
 	}
 	return rups
@@ -124,7 +139,9 @@ pub fn (c CPool) penyediadlmswakelola() []Rup {
 pub fn (c CPool) all_rup() []Rup {
 	mut rups := []Rup{}
 	q := 'select nama_satker, kode_satker, kode_rup, nama_paket, \
-	sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, \
+	sumber_dana, pagu, awal_pemilihan, akhir_pemilihan, \
+	awal_pelaksanaan, akhir_pelaksanaan, awal_pemanfaatan, \
+	akhir_pemanfaatan, tipe, kegiatan, \
 	metode, tahun, last_updated from v_rups;'
 	rows, _ := c.exec(q)
 	for item in rows {
@@ -136,13 +153,18 @@ pub fn (c CPool) all_rup() []Rup {
 		rup.sumber_dana = item.vals[4]
 		rup.pagu = item.vals[5]
 		rup.awal_pemilihan = item.vals[6]
-		rup.tipe = item.vals[7]
-		rup.kegiatan = item.vals[8]
-		rup.metode = item.vals[9]
+		rup.akhir_pemilihan = item.vals[7]
+		rup.awal_pelaksanaan = item.vals[8]
+		rup.akhir_pelaksanaan = item.vals[9]
+		rup.awal_pemanfaatan = item.vals[10]
+		rup.akhir_pemanfaatan = item.vals[11]
+		rup.tipe = item.vals[12]
+		rup.kegiatan = item.vals[13]
+		rup.metode = item.vals[14]
 
 		//rup.jenis = jenis_pengadaan_from_str(item[11])
-		rup.year = item.vals[10]
-		rup.last_updated = item.vals[11]
+		rup.year = item.vals[15]
+		rup.last_updated = item.vals[16]
 		rups << rup
 	}
 	return rups
@@ -151,8 +173,11 @@ pub fn (c CPool) all_rup() []Rup {
 pub fn (c CPool) rup_from_satker(kode_satker string) []Rup {
 	mut rups := []Rup{}
 	q := "select nama_satker, kode_satker, kode_rup, nama_paket, \
-	sumber_dana, pagu, awal_pemilihan, tipe, kegiatan, metode, \
-	tahun, last_updated from v_rups where kode_satker='${kode_satker}'"
+	sumber_dana, pagu, awal_pemilihan, akhir_pemilihan, \
+	awal_pelaksanaan, akhir_pelaksanaan, awal_pemanfaatan, \
+	akhir_pemanfaatan, tipe, kegiatan, \
+	metode, tahun, last_updated from v_rups \
+	where kode_satker='${kode_satker}'"
 
 	rows, _ := c.exec(q) //[]sqlite.Row
 
@@ -166,13 +191,18 @@ pub fn (c CPool) rup_from_satker(kode_satker string) []Rup {
 		rup.sumber_dana = item.vals[4]
 		rup.pagu = item.vals[5]
 		rup.awal_pemilihan = item.vals[6]
-		rup.tipe = item.vals[7]
-		rup.kegiatan = item.vals[8]
-		rup.metode = item.vals[9]
+		rup.akhir_pemilihan = item.vals[7]
+		rup.awal_pelaksanaan = item.vals[8]
+		rup.akhir_pelaksanaan = item.vals[9]
+		rup.awal_pemanfaatan = item.vals[10]
+		rup.akhir_pemanfaatan = item.vals[11]
+		rup.tipe = item.vals[12]
+		rup.kegiatan = item.vals[13]
+		rup.metode = item.vals[14]
 
-		// rup.jenis = jenis_pengadaan_from_str(item[11].str())
-		rup.year = item.vals[10]
-		rup.last_updated = item.vals[11]
+		//rup.jenis = jenis_pengadaan_from_str(item[11])
+		rup.year = item.vals[15]
+		rup.last_updated = item.vals[16]
 		rups << rup
 	}
 	return rups
