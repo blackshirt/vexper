@@ -8,6 +8,17 @@ mut:
 	use_safe_ops bool
 }
 
+fn (c CPool) detail_rup_belum_update(kode_rup string) bool {
+	return !c.detail_penyedia_has_been_updated(kode_rup) || !c.detail_swakelola_has_been_updated(kode_rup)
+}
+
+fn (c CPool) unupdated_detail() []Rup {
+	q := "select select nama_satker, kode_satker, kode_rup, nama_paket, \
+	sumber_dana, pagu, awal_pemilihan, akhir_pemilihan, \
+	awal_pelaksanaan, akhir_pelaksanaan, awal_pemanfaatan, \
+	akhir_pemanfaatan, tipe, kegiatan, \
+	metode, tahun, last_updated from v_rups where jenis='Unknown' or awal_pemanfaatan='Unknown'"
+}
 // gets arrays of `kode_rup` from satker `kode_satker`
 fn (c CPool) koderup_from_satker(kode_satker string) ?[]string {
 	if c.satker_exist_dikegiatan(kode_satker) {

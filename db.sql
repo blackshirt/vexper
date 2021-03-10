@@ -215,4 +215,4 @@ from
     v_rups
 group by
     metode,
-    tipe
+    tipe;
