@@ -51,17 +51,26 @@ fn main() {
 	
 	/*
 	Concurrent version get detail rups
-	*/
+	
 	rchan := chan siroup.DetailResult{}
 	rch := chan siroup.DetailPropertiRup{}
 	drs := c.fetch_detail_from_satker_conccurently('63421', rchan) or {return}
 	//println(drs)
-	dpr := siroup.decode_detail(drs, rch)
+	dpr := siroup.decode_detail_concurrently(drs, rch)
 	//println(dpr)
 	c.update_detail(dpr)
 	rchan.close()
 	rch.close()
-	
+	*/
+
+
+	/*
+	thread version of detail
+	*/
+	res := c.thread_version_fetch_detail_from_satker('63404')
+	//println(res)
+	dpr := siroup.decode_detail(res)
+	c.update_detail(dpr) or {panic(err.msg)}
 }
 
 /*
