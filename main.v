@@ -67,7 +67,7 @@ fn main() {
 	/*
 	thread version of detail
 	*/
-	res := c.thread_version_fetch_detail_from_satker('99127')
+	res := c.thread_version_fetch_detail_from_satker('63404')
 	//println(res)
 	dpr := siroup.decode_detail(res)
 	c.update_detail(dpr) or {panic(err.msg)}

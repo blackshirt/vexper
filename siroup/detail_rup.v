@@ -69,6 +69,7 @@ fn (c CPool) filter_rup_detail_belum_keupdate(rups []Rup) []Rup {
 	return res
 }
 
+
 fn (c CPool) rup_detail_has_been_updated(rup Rup) bool {
 	match rup.tipe {
 		'Penyedia', 'Penyedia dalam Swakelola' { return c.detail_penyedia_has_been_updated(rup.kode_rup) }
@@ -76,7 +77,6 @@ fn (c CPool) rup_detail_has_been_updated(rup Rup) bool {
 		else { return false }
 	}
 }
-
 
 fn (c CPool) update_detail_penyedia(dr DetailPropertiRup) ?int {
 	if c.is_penyedia(dr.kode_rup) {
