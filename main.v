@@ -77,7 +77,7 @@ fn main() {
 	rewrite using sync.pool based fetcher and decode
 	*/
 	//let gets []Rup array
-	rups_in_unknown := c.rup_from_satker_in_unknown("63460") or { 
+	rups_in_unknown := c.rup_from_satker_in_unknown("63421") or { 
 		eprintln("error")
 		exit(-1)
 	}
@@ -89,9 +89,7 @@ fn main() {
 	pp.work_on_items<siroup.Rup>(rups_in_unknown)
 	// get results
 	for dr in pp.get_results<siroup.DetailResult>() {
-		if dr.result_in_oops() {
-			continue
-		}
+		
 		item := dr.decode()
 		println(item)
 	}

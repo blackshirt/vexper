@@ -164,10 +164,7 @@ pub fn fetch_and_decode_worker(p &pool.PoolProcessor, idx int, worker_id int) &D
 // normal decode
 pub fn (dr DetailResult) decode() DetailPropertiRup {
 	mut spr := DetailPropertiRup{}
-	if dr.result_in_oops() {
-		eprintln("#Error in result oops")
-		exit(-1)
-	}
+	
 	if dr.tipe in [.pyd, .pds] {
 		waktu_tags := tags_waktu_penyedia(dr)
 		jenis_tags := tags_jenis_pengadaan(dr)
@@ -264,89 +261,6 @@ fn (dr DetailResult) decode_concurrently(rch chan DetailPropertiRup) {
 	rch <- spr
 }
 */
-
-// tags pembaharuan paket
-fn tags_pembaharuan(dr DetailResult) []&html.Tag {
-	mut doc := html.parse(dr.body)
-	mut res := []&html.Tag{}
-	tags := doc.get_tag('td')
-	for i, tag in tags {
-		if tag.text() == 'Tanggal Perbarui Paket' {
-			idx := i + 1
-			res << tags[idx]
-			return res
-		}
-	}
-	return res
-}
-
-// tags kualifikasi usaha
-fn tags_kualifikasi_usaha(dr DetailResult) []&html.Tag {
-	mut doc := html.parse(dr.body)
-	mut res := []&html.Tag{}
-	tags := doc.get_tag('td')
-	for i, tag in tags {
-		if tag.text() == 'Usaha Kecil' {
-			idx := i + 1
-			res << tags[idx]
-			return res
-		}
-	}
-	return res
-}
-
-// tags jenis pengadaan
-fn tags_jenis_pengadaan(dr DetailResult) []&html.Tag {
-	mut doc := html.parse(dr.body)
-	mut res := []&html.Tag{}
-	tags := doc.get_tag('td')
-	for i, tag in tags {
-		if tag.text() == 'Jenis Pengadaan' {
-			idx := i + 1
-			res << tags[idx]
-			return res
-		}
-	}
-	return res
-}
-
-// tags waktu penyedia
-fn tags_waktu_penyedia(dr DetailResult) []&html.Tag {
-	mut doc := html.parse(dr.body)
-	mut res := []&html.Tag{}
-	tags := doc.get_tag('td')
-	for tag in tags {
-		attr := tag.attributes.clone()
-		if 'class' in attr && attr['class'] == 'mid' {
-			res << tag
-		}
-	}
-	// res.len should == 6
-	return res
-}
-
-// tags waktu swakelola dan tipe_swakelola
-fn tags_waktu_swakelola(dr DetailResult) []&html.Tag {
-	mut doc := html.parse(dr.body)
-	mut res := []&html.Tag{}
-	tags := doc.get_tags() // get all tags, no specific info about tag to find
-
-	for i, tag in tags {
-		if tag.text() == 'Tipe Swakelola' {
-			idx := i + 1
-			res << tags[idx]
-		}
-		if tag.text() == 'Awal' {
-			idx := i + 1
-			res << tags[idx]
-		}
-		if tag.text() == 'Akhir' {
-			idx := i + 1
-			res << tags[idx]
-		}
-	}
-	return res
-}
 
 // `detail_rup_url` for building url spesific to tipe kegiatan in `tpk` 
 // and `kode_rup` params
