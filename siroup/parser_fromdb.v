@@ -26,6 +26,28 @@ fn (c CPool) koderup_from_satker(kode_satker string) ?[]string {
 	return error("Satker ${kode_satker} tidak ada di database")
 }
 
+pub fn (c CPool) rup_from_satker_in_unknown(kode_satker string) ?[]Rup {
+	mut rups := []Rup{}
+	kode_rups := c.koderup_from_satker(kode_satker) or {
+		eprintln("#Error kode rup from satker")
+		return  error("Error kode rup from satker")
+	}
+	
+	if kode_rups.len != 0 {
+		for kode in kode_rups {
+			if !c.detail_rup_belum_update(kode) {
+				continue
+			}
+			rup := c.rup_with_kode(kode) or {
+				eprintln("#Error rup with kode")
+				return error("#Error rup with kode")
+			}
+			rups << rup
+		}
+	}
+	return rups
+}
+
 pub fn (c CPool) rup_with_kode(kode_rup string) ?Rup {
 	if c.rup_withkode_exist(kode_rup) {
 		q := "select nama_satker, kode_satker, kode_rup, nama_paket, \

@@ -1,6 +1,6 @@
 import siroup
 import sqlite
-//import sync
+import sync.pool
 /*
 import sqlite
 import nedpals.vex.router
@@ -66,11 +66,36 @@ fn main() {
 
 	/*
 	thread version of detail
-	*/
-	res := c.thread_version_fetch_detail_from_satker('63404')
+	
+	res := c.thread_version_fetch_detail_from_satker('63408')
 	//println(res)
 	dpr := siroup.decode_detail(res)
 	c.update_detail(dpr) or {panic(err.msg)}
+	*/
+
+	/*
+	rewrite using sync.pool based fetcher and decode
+	*/
+	//let gets []Rup array
+	rups_in_unknown := c.rup_from_satker_in_unknown("63460") or { 
+		eprintln("error")
+		exit(-1)
+	}
+	//println(rups_in_unknown)
+
+	// let setup pool processor
+	mut pp := pool.new_pool_processor(callback: siroup.fetch_and_decode_worker)
+	// lets pool work on items on unupdated array of rup above
+	pp.work_on_items<siroup.Rup>(rups_in_unknown)
+	// get results
+	for dr in pp.get_results<siroup.DetailResult>() {
+		if dr.result_in_oops() {
+			continue
+		}
+		item := dr.decode()
+		println(item)
+	}
+	
 }
 
 /*

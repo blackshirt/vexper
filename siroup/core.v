@@ -111,7 +111,7 @@ fn jenis_pengadaan_from_str(jp string) JenisPengadaan {
 }
 
 // generic rup item
-struct Rup {
+pub struct Rup {
 mut:
 	kode_rup             string
 	kode_satker          string

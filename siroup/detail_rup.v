@@ -5,6 +5,8 @@ import net.html
 import net.http
 import net.urllib
 
+import sync.pool
+
 const (
 	base     = 'https://sirup.lkpp.go.id/sirup/home/'
 	swa      = 'detailPaketSwakelolaPublic2017'
@@ -22,7 +24,7 @@ mut:
 	err_msg  string
 }
 
-struct DetailPropertiRup {
+pub struct DetailPropertiRup {
 mut:
 	kode_rup                  string
 	jenis_pengadaan           string
@@ -38,7 +40,7 @@ mut:
 }
 
 // result in oops, maybe need retry or just continue 
-fn (dr DetailResult) result_in_oops() bool {
+pub fn (dr DetailResult) result_in_oops() bool {
 	mut doc := html.parse(dr.body)
 	tags := doc.get_tag('h1') //<h1 class="header">Oops, sabar ya !</h1>
 	for tag in tags {
@@ -111,6 +113,10 @@ fn (c CPool) update_detail_swakelola(dr DetailPropertiRup) ?int {
 }
 
 pub fn (c CPool) update_detail(dpr []DetailPropertiRup) ? {
+	if dpr.len == 0 {
+		eprintln("#Error len 0")
+		return error("Error 0 len")
+	}
 	c.exec("BEGIN TRANSACTION")
 	for item in dpr {
 		if c.is_penyedia(item.kode_rup) {
@@ -129,17 +135,39 @@ pub fn (c CPool) update_detail(dpr []DetailPropertiRup) ? {
 // decode array of DetailResult
 pub fn decode_detail(drs []DetailResult) []DetailPropertiRup {
 	mut dpr := []DetailPropertiRup{}
+	if drs.len == 0 {
+		return dpr
+	}
 	for item in drs {
+		if item.result_in_oops() {
+			continue
+		}
 		res := item.decode()
 		dpr << res
 	}
 	return dpr
 }
 
+//setup ThreadCB = fn (p &PoolProcessor, idx int, task_id int) voidptr
+//this thread callback task was fetch the item and store the result in DetailResult and then 
+// decode the DetailResult to DetailPropertiRup
+pub fn fetch_and_decode_worker(p &pool.PoolProcessor, idx int, worker_id int) &DetailResult {
+	println("Get index ${idx}")
+	item := p.get_item<Rup>(idx)
+	println("Working fetch on item ... ${item.kode_rup}")
+	dr := do_fetch(item)
+	//println("Decoding detail result .. ${dr.kode_rup}")
+	//dpr := dr.decode()
+	return &dr
+}
 
 // normal decode
-fn (dr DetailResult) decode() DetailPropertiRup {
+pub fn (dr DetailResult) decode() DetailPropertiRup {
 	mut spr := DetailPropertiRup{}
+	if dr.result_in_oops() {
+		eprintln("#Error in result oops")
+		exit(-1)
+	}
 	if dr.tipe in [.pyd, .pds] {
 		waktu_tags := tags_waktu_penyedia(dr)
 		jenis_tags := tags_jenis_pengadaan(dr)
@@ -341,6 +369,10 @@ fn detail_rup_url(tpk TipeKeg, kode_rup string) ?string {
 }
 
 fn build_jenis_url_for_rups(rups []Rup) ?[]string {
+	if rups.len == 0 {
+		eprintln("#Error 0 len of rups")
+		return error("rups 0")
+	}
 	mut res := []string{}
 	for rup in rups {
 		url := detail_rup_url(tipekeg_from_str(rup.tipe), rup.kode_rup) ?
@@ -370,6 +402,7 @@ fn do_fetch(rup Rup) DetailResult {
 // thread based concurrent fetch using `[]thread` form in latest v
 pub fn (c CPool) thread_version_fetch_detail_from_satker(kode_satker string) []DetailResult {
 	rups := c.rup_from_satker(kode_satker)
+	// rups maybe 0 len
 	mut drs := []thread DetailResult{}
 	if rups.len == 0 { return []DetailResult{} }
 	
