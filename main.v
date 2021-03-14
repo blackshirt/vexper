@@ -76,24 +76,22 @@ fn main() {
 	/*
 	rewrite using sync.pool based fetcher and decode
 	*/
+
 	//let gets []Rup array
-	rups_in_unknown := c.rup_from_satker_in_unknown("63421") or { 
-		eprintln("error")
-		exit(-1)
+	unupdated_rups := c.rup_from_satker_unupdated("94031")
+	//println(unupdated_rups)
+	if unupdated_rups.len == 0 {
+		return
 	}
-	//println(rups_in_unknown)
 
 	// let setup pool processor
 	mut pp := pool.new_pool_processor(callback: siroup.fetch_and_decode_worker)
 	// lets pool work on items on unupdated array of rup above
-	pp.work_on_items<siroup.Rup>(rups_in_unknown)
+	pp.work_on_items<siroup.Rup>(unupdated_rups)
 	// get results
-	for dr in pp.get_results<siroup.DetailResult>() {
-		
-		item := dr.decode()
-		println(item)
-	}
-	
+	drs := pp.get_results<siroup.DetailResult>()
+	dpr := siroup.decode_detail(drs)
+	c.update_detail(dpr) or { panic(err.msg)}
 }
 
 /*

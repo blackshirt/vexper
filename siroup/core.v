@@ -59,7 +59,7 @@ pub fn (mp MetodePengadaan) str() string {
 		.dikecualikan { 'Dikecualikan' }
 		.pengadaanlangsung { 'Pengadaan Langsung' }
 		.penunjukanlangsung { 'Penunjukan Langsung' }
-		.unknown {'Unknown'}
+		.unknown { 'Unknown' }
 	}
 }
 
@@ -72,7 +72,7 @@ pub fn metode_from_str(m string) MetodePengadaan {
 		'Dikecualikan' { MetodePengadaan.dikecualikan }
 		'Pengadaan Langsung' { MetodePengadaan.pengadaanlangsung }
 		'Penunjukan Langsung' { MetodePengadaan.penunjukanlangsung }
-		else {MetodePengadaan.unknown}
+		else { MetodePengadaan.unknown }
 	}
 }
 
@@ -142,6 +142,26 @@ fn (r Rup) is_penyedia() bool {
 
 fn (r Rup) is_swakelola() bool {
 	return r.tipe == 'Swakelola'
+}
+
+fn (r Rup) detail_penyedia_unupdated() bool {
+	// only check field specific to penyedia
+	return r.awal_pelaksanaan == 'Unknown' || r.awal_pelaksanaan == ''
+}
+
+fn (r Rup) detail_swakelola_unupdated() bool {
+	// field to check in swakelola 
+	return r.awal_pemanfaatan == 'Unknown' || r.awal_pemanfaatan == ''
+}
+
+fn (r Rup) detail_rup_unupdated() bool {
+	if r.is_penyedia() {
+		return r.detail_penyedia_unupdated()
+	}
+	if r.is_swakelola() {
+		return r.detail_swakelola_unupdated()
+	}
+	return false
 }
 
 // ["D128","Pemerintah Daerah Kabupaten Kebumen",

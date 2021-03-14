@@ -67,7 +67,7 @@ fn tags_jenis_pengadaan(dr DetailResult) []&html.Tag {
 }
 
 // tags waktu penyedia
-/*
+/* typical html response
 <tr>
     <td class="label-left">Pemanfaatan Barang/Jasa</td>
     <td>

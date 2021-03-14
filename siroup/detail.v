@@ -54,31 +54,22 @@ pub fn (dr DetailResult) result_in_oops() bool {
 
 
 // maybe using array.filter
-fn (c CPool) filter_rup_detail_belum_keupdate(rups []Rup) []Rup {
+fn filter_detail_rup_unupdated(rups []Rup) []Rup {
+	if rups.len == 0 { return []Rup{} }
+	return rups.filter(fn (r Rup) bool { return r.detail_rup_unupdated() })
+	
 	/*
-	res := rups.filter(fn (r Rup) bool {
-		return !c.rup_detail_has_been_updated(r)
-	})
-	return res
-	*/
 	mut res := []Rup{}
 	for rup in rups {
-		if c.rup_detail_has_been_updated(rup) {
+		if rup.detail_rup_unupdated() {
 			continue
 		}
 		res << rup
 	}
 	return res
+	*/
 }
 
-
-fn (c CPool) rup_detail_has_been_updated(rup Rup) bool {
-	match rup.tipe {
-		'Penyedia', 'Penyedia dalam Swakelola' { return c.detail_penyedia_has_been_updated(rup.kode_rup) }
-		'Swakelola' { return c.detail_swakelola_has_been_updated(rup.kode_rup) }
-		else { return false }
-	}
-}
 
 fn (c CPool) update_detail_penyedia(dr DetailPropertiRup) ?int {
 	if c.is_penyedia(dr.kode_rup) {
@@ -148,17 +139,32 @@ pub fn decode_detail(drs []DetailResult) []DetailPropertiRup {
 	return dpr
 }
 
-//setup ThreadCB = fn (p &PoolProcessor, idx int, task_id int) voidptr
-//this thread callback task was fetch the item and store the result in DetailResult and then 
-// decode the DetailResult to DetailPropertiRup
+
+fn do_fetch_with_reference(rup Rup) &DetailResult {
+	mut dr := &DetailResult{}
+	url := detail_rup_url(tipekeg_from_str(rup.tipe), rup.kode_rup) or { 
+		eprintln("#Error detail rup url")
+		panic(err.msg)
+	}
+	start := time.ticks()
+	body := http.get_text(url)
+	finish := time.ticks()
+	println('Finish fetch $url in ... ${finish - start} ms')
+	
+	//setting up result
+	dr.kode_rup = rup.kode_rup
+	dr.tipe = tipekeg_from_str(rup.tipe)
+	dr.url = url
+	dr.body = body
+	return dr 
+}
+
+
+//setup ThreadCB this thread callback call the the real `do_fetch` to do fetch and store the result in DetailResult 
 pub fn fetch_and_decode_worker(p &pool.PoolProcessor, idx int, worker_id int) &DetailResult {
-	println("Get index ${idx}")
 	item := p.get_item<Rup>(idx)
-	println("Working fetch on item ... ${item.kode_rup}")
-	dr := do_fetch(item)
-	//println("Decoding detail result .. ${dr.kode_rup}")
-	//dpr := dr.decode()
-	return &dr
+	println("Working on rup no ${idx} -- ${item.kode_rup}")
+	return do_fetch_with_reference(item)
 }
 
 // normal decode
@@ -312,6 +318,7 @@ fn do_fetch(rup Rup) DetailResult {
 	dr.body = body
 	return dr 
 }
+
 
 // thread based concurrent fetch using `[]thread` form in latest v
 pub fn (c CPool) thread_version_fetch_detail_from_satker(kode_satker string) []DetailResult {
